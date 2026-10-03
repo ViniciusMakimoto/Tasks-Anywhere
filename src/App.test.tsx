@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@solidjs/testing-library';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import App from './App';
 import { clearTasks } from './store/taskStore';
 
@@ -114,5 +114,22 @@ describe('App Main UI & Integration Test (TDD)', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: /TasksAnywhere/i })).toBeInTheDocument();
   });
+
+  it('permite alternar ativação de lembretes e notificações no cabeçalho', async () => {
+    // @ts-expect-error Mocking Notification
+    globalThis.Notification = {
+      permission: 'default',
+      requestPermission: vi.fn().mockResolvedValue('granted'),
+    };
+
+    render(() => <App />);
+
+    const notifBtn = screen.getByRole('button', { name: /Ativar notificações|Lembretes/i });
+    expect(notifBtn).toBeInTheDocument();
+
+    await fireEvent.click(notifBtn);
+    expect(globalThis.Notification.requestPermission).toHaveBeenCalled();
+  });
 });
+
 

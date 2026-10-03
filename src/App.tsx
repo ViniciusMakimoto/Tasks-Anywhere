@@ -24,6 +24,13 @@ import {
   SortByType,
 } from './components/tasks';
 import { StickyWidget } from './components/sticky';
+import {
+  hasNotificationPermission,
+  requestNotificationPermission,
+  dispatchTaskReminders,
+  getNotificationSettings,
+  saveNotificationSettings,
+} from './services/notificationService';
 import { TaskPriority } from './types/task';
 import {
   Sun,
@@ -36,6 +43,7 @@ import {
   ChevronDown,
   ChevronUp,
   Pin,
+  Bell,
 } from 'lucide-solid';
 
 const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
@@ -47,6 +55,7 @@ const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
 
 export default function App() {
   const [viewMode, setViewMode] = createSignal<'full' | 'sticky'>('full');
+  const [notifEnabled, setNotifEnabled] = createSignal(false);
   const [filter, setFilter] = createSignal<StatusFilterType>('all');
   const [priorityFilter, setPriorityFilter] = createSignal<TaskPriority | 'all'>('all');
   const [sortBy, setSortBy] = createSignal<SortByType>('recent');
@@ -84,7 +93,28 @@ export default function App() {
         tags: ['backend', 'supabase'],
       });
     }
+
+    // Inicializa preferências de notificação e dispara lembretes se habilitado
+    const notifSettings = getNotificationSettings();
+    if (notifSettings.enabled && hasNotificationPermission()) {
+      setNotifEnabled(true);
+      dispatchTaskReminders(tasks());
+    }
   });
+
+  const handleToggleNotifications = async () => {
+    if (!notifEnabled()) {
+      const perm = await requestNotificationPermission();
+      if (perm === 'granted') {
+        setNotifEnabled(true);
+        saveNotificationSettings({ enabled: true, leadHours: 12 });
+        dispatchTaskReminders(tasks());
+      }
+    } else {
+      setNotifEnabled(false);
+      saveNotificationSettings({ enabled: false, leadHours: 12 });
+    }
+  };
 
   const filteredTasks = createMemo(() => {
     let list = tasks();
@@ -186,6 +216,23 @@ export default function App() {
           </div>
 
           <div class="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleToggleNotifications}
+              aria-label={notifEnabled() ? 'Desativar notificações' : 'Ativar notificações'}
+              class={`border text-xs px-2.5 py-1.5 transition ${
+                notifEnabled()
+                  ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30'
+                  : 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              <Bell class="w-4 h-4" />
+              <span class="ml-1 text-xs hidden sm:inline">
+                {notifEnabled() ? 'Lembretes Ativos' : 'Lembretes'}
+              </span>
+            </Button>
+
             <Button
               variant="ghost"
               size="sm"
