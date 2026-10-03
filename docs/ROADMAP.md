@@ -89,9 +89,9 @@
 ---
 
 ### Fase 6: Desktop Nativo (Tauri) & Polimento Final
-- [ ] **Task 6.1: Setup do Tauri**
+- [x] **Task 6.1: Setup do Tauri**
   - **Objetivo:** Configuração do Tauri v2 para compilar o executável Windows nativo.
-- [ ] **Task 6.2: Janela Always-on-Top e Atalho Global**
+- [x] **Task 6.2: Janela Always-on-Top e Atalho Global**
   - **Objetivo:** Janela flutuante transparente/frameless com tecla de atalho global para invocar a Sticky Note de qualquer lugar.
-- [ ] **Task 6.3: Build de Distribuição & CD de Releases (GitHub Actions)**
+- [x] **Task 6.3: Build de Distribuição & CD de Releases (GitHub Actions)**
   - **Objetivo:** Geração dos instaladores nativos do Windows (`.exe` e `.msi`) via `tauri-action` e publicação automática em GitHub Releases a cada tag de versão (`v*`).

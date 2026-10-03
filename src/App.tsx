@@ -1,6 +1,10 @@
-import { createSignal, createMemo, createEffect, onMount, For, Show } from 'solid-js';
+import { createSignal, createMemo, createEffect, onMount, onCleanup, For, Show } from 'solid-js';
 import { Button, Card } from './components/ui';
 import { theme, toggleTheme, initTheme } from './theme/theme';
+import {
+  setStickyWindowMode,
+  setupDesktopGlobalShortcut,
+} from './services/desktopWindowService';
 import {
   tasks,
   initTaskStore,
@@ -112,7 +116,22 @@ export default function App() {
       setNotifEnabled(true);
       dispatchTaskReminders(tasks());
     }
+
+    // Atalho de teclado desktop global (Alt+Shift+T) para alternar Sticky Note
+    const cleanupShortcut = setupDesktopGlobalShortcut(() => {
+      const nextMode = viewMode() === 'full' ? 'sticky' : 'full';
+      handleToggleViewMode(nextMode);
+    });
+
+    onCleanup(() => {
+      cleanupShortcut();
+    });
   });
+
+  const handleToggleViewMode = async (mode: 'full' | 'sticky') => {
+    setViewMode(mode);
+    await setStickyWindowMode(mode === 'sticky');
+  };
 
   createEffect(() => {
     const currentUser = user();
@@ -213,7 +232,7 @@ export default function App() {
               <StickyWidget
                 tasks={filteredTasks()}
                 isExpandedMode={false}
-                onToggleMode={() => setViewMode('full')}
+                onToggleMode={() => handleToggleViewMode('full')}
                 onToggleStatus={toggleTaskStatus}
                 onAddTask={(title) => addTask({ title, priority: 'medium' })}
                 onDelete={deleteTask}
@@ -293,7 +312,7 @@ export default function App() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setViewMode('sticky')}
+              onClick={() => handleToggleViewMode('sticky')}
               aria-label="Modo Sticky Note"
               class="border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-amber-500/50"
             >
