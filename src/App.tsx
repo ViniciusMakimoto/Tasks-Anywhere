@@ -1,5 +1,5 @@
 import { createSignal, createMemo, onMount, For, Show } from 'solid-js';
-import { Button, Badge, Card } from './components/ui';
+import { Button, Card } from './components/ui';
 import { theme, toggleTheme, initTheme } from './theme/theme';
 import {
   tasks,
@@ -7,21 +7,22 @@ import {
   addTask,
   deleteTask,
   toggleTaskStatus,
+  addSubtask,
+  toggleSubtask,
+  deleteSubtask,
   pendingCount,
   completedCount,
   todayTasks,
 } from './store/taskStore';
+import { TaskList } from './components/tasks';
 import { TaskPriority } from './types/task';
 import {
   Sun,
   Moon,
   Plus,
-  Trash2,
   Calendar,
   CheckCircle2,
-  Circle,
   Tag,
-  ListTodo,
   Sparkles,
   SlidersHorizontal,
   ChevronDown,
@@ -116,18 +117,6 @@ export default function App() {
     setShowDetails(false);
   };
 
-  const getPriorityVariant = (p: TaskPriority) => {
-    switch (p) {
-      case 'urgent':
-        return 'danger';
-      case 'high':
-        return 'warning';
-      case 'medium':
-        return 'primary';
-      default:
-        return 'default';
-    }
-  };
 
   const toggleExpand = (id: string) => {
     setExpandedTaskId(expandedTaskId() === id ? null : id);
@@ -383,123 +372,19 @@ export default function App() {
         </section>
 
         {/* Task List */}
-        <section class="space-y-2.5">
-          <Show
-            when={filteredTasks().length > 0}
-            fallback={
-              <Card class="border border-dashed border-slate-300 dark:border-slate-800 p-8 text-center flex flex-col items-center justify-center">
-                <ListTodo class="w-10 h-10 text-slate-400 mb-2 stroke-1" />
-                <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Nenhuma tarefa nesta visualização
-                </p>
-                <p class="text-xs text-slate-500 mt-1">
-                  Adicione uma nova tarefa no campo acima para começar!
-                </p>
-              </Card>
-            }
-          >
-            <For each={filteredTasks()}>
-              {(task) => (
-                <Card
-                  variant="interactive"
-                  class={`p-3.5 transition-all ${
-                    task.status === 'completed'
-                      ? 'opacity-65 bg-slate-50/80 dark:bg-slate-950/40'
-                      : ''
-                  }`}
-                >
-                  <div class="flex items-start sm:items-center justify-between gap-3">
-                    <div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
-                      {/* Checkbox */}
-                      <label class="relative flex items-center cursor-pointer mt-0.5 sm:mt-0">
-                        <input
-                          type="checkbox"
-                          checked={task.status === 'completed'}
-                          onChange={() => toggleTaskStatus(task.id)}
-                          aria-label={task.title}
-                          class="sr-only"
-                        />
-                        <div
-                          class={`w-5 h-5 rounded-md border flex items-center justify-center transition ${
-                            task.status === 'completed'
-                              ? 'bg-emerald-600 border-emerald-600 text-white'
-                              : 'border-slate-300 dark:border-slate-700 hover:border-indigo-500'
-                          }`}
-                        >
-                          {task.status === 'completed' ? (
-                            <CheckCircle2 class="w-3.5 h-3.5" />
-                          ) : (
-                            <Circle class="w-3.5 h-3.5 text-transparent" />
-                          )}
-                        </div>
-                      </label>
-
-                      {/* Content */}
-                      <div
-                        class="flex-1 min-w-0 cursor-pointer"
-                        onClick={() => toggleExpand(task.id)}
-                      >
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <span
-                            class={`text-sm font-medium tracking-tight truncate ${
-                              task.status === 'completed'
-                                ? 'line-through text-slate-400 dark:text-slate-500'
-                                : 'text-slate-900 dark:text-slate-100'
-                            }`}
-                          >
-                            {task.title}
-                          </span>
-
-                          <Badge variant={getPriorityVariant(task.priority)} size="sm">
-                            {task.priority}
-                          </Badge>
-
-                          <Show when={task.dueDate}>
-                            <Badge variant="default" size="sm" class="font-mono text-[10px]">
-                              <Calendar class="w-3 h-3 mr-0.5" />
-                              {task.dueDate}
-                            </Badge>
-                          </Show>
-                        </div>
-
-                        <Show when={task.description}>
-                          <p class={`text-xs text-slate-500 dark:text-slate-400 mt-1 ${expandedTaskId() === task.id ? '' : 'line-clamp-1'}`}>
-                            {task.description}
-                          </p>
-                        </Show>
-
-                        <Show when={task.tags && task.tags.length > 0}>
-                          <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                            <For each={task.tags}>
-                              {(t) => (
-                                <span class="inline-flex items-center text-[10px] text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-1.5 py-0.5 rounded border border-slate-200/80 dark:border-slate-700/50">
-                                  <Tag class="w-2.5 h-2.5 mr-0.5 text-slate-400" />
-                                  {t}
-                                </span>
-                              )}
-                            </For>
-                          </div>
-                        </Show>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div class="flex items-center gap-1 self-start sm:self-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteTask(task.id)}
-                        aria-label={`Excluir tarefa ${task.title}`}
-                        class="text-slate-400 hover:text-rose-500 p-1.5 h-8 w-8"
-                      >
-                        <Trash2 class="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              )}
-            </For>
-          </Show>
+        <section>
+          <TaskList
+            tasks={filteredTasks()}
+            expandedTaskId={expandedTaskId()}
+            onToggleExpand={toggleExpand}
+            onToggleStatus={toggleTaskStatus}
+            onDelete={deleteTask}
+            onAddSubtask={addSubtask}
+            onToggleSubtask={toggleSubtask}
+            onDeleteSubtask={deleteSubtask}
+            emptyMessage="Nenhuma tarefa nesta visualização"
+            emptyDescription="Adicione uma nova tarefa no campo acima para começar!"
+          />
         </section>
       </div>
 

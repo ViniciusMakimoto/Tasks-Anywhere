@@ -30,7 +30,7 @@
 ---
 
 ### Fase 2: Experiência de Usuário: Layouts & Modo Sticky Note (PC & Mobile)
-- [ ] **Task 2.1: Cards e Lista de Tarefas**
+- [x] **Task 2.1: Cards e Lista de Tarefas**
   - **Objetivo:** Componentes de exibição das tarefas (`TaskCard`, `TaskList`) com badges de prioridade, data de vencimento e checklist de subtarefas.
   - **TDD:** `TaskCard.test.tsx` cobrindo cliques de conclusão, expansão de subtarefas e botões de ação rápida.
 - [ ] **Task 2.2: Visão do Dia & Filtros por Prioridade**
