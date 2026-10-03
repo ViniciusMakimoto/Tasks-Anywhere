@@ -16,7 +16,7 @@
 O **TasksAnywhere** foi concebido para resolver o atrito de anotar tarefas no dia a dia. Seja no computador enquanto joga ou programa, ou na rua pelo celular, você pode capturar tarefas instantaneamente falando por áudio, tirando uma foto ou digitando uma frase rápida.
 
 ### ✨ Destaques
-* 🎙️ **Captura Multimodal por IA:** Envie áudios gravados pelo microfone, fotos de anotações ou textos curtos. O modelo **Gemini 2.0 Flash** processa diretamente o áudio/imagem e gera a tarefa com título, descrição, prioridade, data de vencimento e tags.
+* 🎙️ **Captura Multimodal por IA:** Envie áudios gravados pelo microfone, fotos de anotações ou textos curtos. O modelo **Gemini 3.8 Flash** processa diretamente o áudio/imagem e gera a tarefa com título, descrição, prioridade, data de vencimento e tags.
 * 📌 **Modo Sticky Note no PC:** Janela compacta flutuante com *Always on Top* (sempre no topo) para você acompanhar as tarefas do dia sem ocupar espaço na tela. Expande com 1 clique para a visão completa de dashboard e calendário.
 * 📱 **PWA Móvel:** Funciona em qualquer smartphone como aplicativo instalável, com suporte nativo a microfone e câmera.
 * ⚡ **Reatividade Fina (SolidJS):** Arquitetura 100% orientada a Signals (`createSignal`, `createMemo`), espelhando o paradigma de UI declarativa do **Fusion** no Roblox (`Value`, `Computed`).
@@ -42,7 +42,7 @@ flowchart TD
     end
 
     subgraph AI ["Google AI Studio"]
-        Gemini["Gemini 2.0 Flash\n(Multimodal + JSON Schema)"]
+        Gemini["Gemini 3.8 Flash\n(Multimodal + JSON Schema)"]
     end
 
     PC & Mobile -->|Upload de Mídia| Storage
@@ -65,7 +65,7 @@ flowchart TD
 | **Estilização** | [Tailwind CSS](https://tailwindcss.com/) | Design moderno, elegante, temas claro/escuro e micro-animações. |
 | **Desktop** | [Tauri](https://tauri.app/) | Executável leve (~10 MB) para controle nativo da janela flutuante no Windows. |
 | **Backend & Banco** | [Supabase](https://supabase.com/) | PostgreSQL com RLS, buckets de Storage para mídias e Edge Functions serverless. |
-| **Inteligência Artificial** | [Gemini 2.0 Flash](https://ai.google.dev/) | Extração estruturada de tarefas com suporte nativo a áudio e visão. |
+| **Inteligência Artificial** | [Gemini 3.8 Flash](https://ai.google.dev/) | Extração estruturada de tarefas com suporte nativo a áudio e visão. |
 | **Memória de Engenharia**| [ai-memory](https://github.com/akitaonrails/ai-memory) | Preservação de contexto e decisões de arquitetura no desenvolvimento. |
 
 ---
@@ -88,9 +88,15 @@ Crie um arquivo `.env` a partir do modelo:
 ```bash
 cp .env.example .env
 ```
-Preencha com suas credenciais do **Supabase** e chave do **Gemini API**.
+Preencha com suas credenciais do **Supabase** (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) e chave do **Gemini API** (`GEMINI_API_KEY`).
 
-### 3. Rodar em desenvolvimento
+### 3. Validar credenciais do Supabase e Gemini
+Execute o validador automatizado para garantir que as APIs e chaves estão ativas e com permissão:
+```bash
+npm run verify:credentials
+```
+
+### 4. Rodar em desenvolvimento
 ```bash
 npm install
 npm run dev
