@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "verify:credentials": "node scripts/verify-credentials.mjs"
   },
   "dependencies": {
     "lucide-solid": "^1.50.0",
