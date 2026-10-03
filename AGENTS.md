@@ -109,9 +109,15 @@ start/end HTML-comment markers, without disturbing the rest of the file.
 
 ## Regras do Projeto TasksAnywhere
 
-### 1. Registro Ativo de Contexto no ai-memory
+### 1. Test-Driven Development (TDD) Obrigatório
+- **Metodologia:** O desenvolvimento segue o ciclo Red-Green-Refactor.
+- **Ferramentas:** **Vitest** + **@solidjs/testing-library** + **jsdom**.
+- **Regra:** Nenhuma funcionalidade de lógica de negócio, store reativa, validação de schema ou componente de UI deve ser escrita sem antes criar seus respectivos testes unitários/integração.
+
+### 2. Registro Ativo de Contexto no ai-memory
 - **Decisões de Arquitetura:** Toda decisão estrutural (ex: escolha do SolidJS com Signals, modelos de dados no Supabase, modo Sticky Note no Tauri) deve ser registrada como página durável no `ai-memory` sob o caminho `architecture/<topico>.md` (`--kind decision`).
 - **Gotchas e Soluções:** Sempre que um bug difícil for resolvido ou uma peculiaridade do Windows/Supabase/SolidJS for descoberta, documentar em `gotchas/<topico>.md` (`--kind gotcha`).
 - **Convenções e Regras:** Convenções estabelecidas de código e banco de dados devem ser salvas em `rules/<topico>.md` (`--kind rule`).
 - **Consulta Prévia:** Antes de propor mudanças estruturais ou introduzir novas bibliotecas, consultar o histórico do `ai-memory` para preservar a consistência das decisões anteriores.
+
 
