@@ -12,7 +12,7 @@
   - **Objetivo:** Inicializar o projeto SolidJS com TypeScript, Vite e Tailwind CSS.
   - **TDD:** Configurar **Vitest** + **@solidjs/testing-library** + **jsdom**. Criar teste de sanidade (`App.test.tsx` e `setupTests.ts`) e validar `npm test`.
   - **Critério de Aceite:** `npm run dev` roda a página de boas-vindas do SolidJS e `npm test` passa 100% dos testes.
-- [ ] **Task 1.2: Pipeline de Integração Contínua (GitHub Actions)**
+- [x] **Task 1.2: Pipeline de Integração Contínua (GitHub Actions)**
   - **Objetivo:** Criar `.github/workflows/ci.yml` para rodar os testes e build automaticamente a cada push/PR.
   - **Critério de Aceite:** Workflow passando no GitHub.
 - [ ] **Task 1.3: Design System & Tokens de Estilo**
