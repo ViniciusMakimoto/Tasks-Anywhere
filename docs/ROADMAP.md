@@ -42,8 +42,8 @@
 - [ ] **Task 2.4: Notificações & Lembretes Antecipados**
   - **Objetivo:** Integração com Notification API do navegador/sistema com configuração global de aviso (ex: 12h antes do vencimento).
   - **TDD:** Testar cálculo de disparos de lembretes e permissão de notificações.
-- [ ] **Task 2.5: PWA (Mobile Ready)**
-  - **Objetivo:** Configuração de `manifest.json` e Service Worker para instalação no celular ("Adicionar à Tela de Início").
+- [ ] **Task 2.5: PWA (Mobile Ready) & CD no GitHub Pages**
+  - **Objetivo:** Configuração de `manifest.json`, Service Worker para instalação no celular ("Adicionar à Tela de Início") e pipeline de CD no GitHub Actions para deploy automático no GitHub Pages a cada push na `main`.
 
 ---
 
@@ -70,6 +70,8 @@
   - **Objetivo:** Buckets temporários no Supabase Storage para áudios/fotos com exclusão automática após o processamento da IA para economizar cota.
 - [ ] **Task 4.4: Sincronização Realtime**
   - **Objetivo:** Conectar a store reativa do SolidJS ao Supabase Realtime para que atualizações no celular reflitam no PC instantaneamente.
+- [ ] **Task 4.5: CD de Migrações do Supabase (GitHub Actions)**
+  - **Objetivo:** Pipeline no GitHub Actions para aplicar migrações do banco (`supabase db push`) automaticamente em ambiente de staging/produção a cada push na `main`.
 
 ---
 
@@ -81,6 +83,8 @@
   - **TDD:** Testes de schema com Zod garantindo que formatos válidos e inválidos da IA sejam tratados sem quebrar a aplicação.
 - [ ] **Task 5.3: Área de Tarefas Incompletas & Esclarecimento da IA**
   - **Objetivo:** Se a entrada for ambígua, a tarefa fica armazenada na aba "Incompletas/Rascunhos" com a pergunta da IA, permitindo responder por texto ou áudio rápido para completar a tarefa.
+- [ ] **Task 5.4: CD das Edge Functions (GitHub Actions)**
+  - **Objetivo:** Deploy contínuo das funções serverless da IA (`supabase functions deploy`) no Supabase via GitHub Actions secrets.
 
 ---
 
@@ -89,5 +93,5 @@
   - **Objetivo:** Configuração do Tauri v2 para compilar o executável Windows nativo.
 - [ ] **Task 6.2: Janela Always-on-Top e Atalho Global**
   - **Objetivo:** Janela flutuante transparente/frameless com tecla de atalho global para invocar a Sticky Note de qualquer lugar.
-- [ ] **Task 6.3: Build de Distribuição & Fechamento**
-  - **Objetivo:** Geração dos instaladores e documentação final no `ai-memory`.
+- [ ] **Task 6.3: Build de Distribuição & CD de Releases (GitHub Actions)**
+  - **Objetivo:** Geração dos instaladores nativos do Windows (`.exe` e `.msi`) via `tauri-action` e publicação automática em GitHub Releases a cada tag de versão (`v*`).
