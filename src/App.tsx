@@ -24,6 +24,7 @@ import {
   SortByType,
 } from './components/tasks';
 import { StickyWidget } from './components/sticky';
+import { CaptureInbox } from './components/inbox';
 import {
   hasNotificationPermission,
   requestNotificationPermission,
@@ -290,8 +291,10 @@ export default function App() {
           </Card>
         </section>
 
-        {/* Task Creation Form with Expandable Details */}
-        <section>
+        {/* Task Capture (Multimodal Chat Inbox & Detailed Options) */}
+        <section class="space-y-3">
+          <CaptureInbox onTaskCreated={addTask} />
+
           <form
             onSubmit={handleCreateTask}
             class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-lg space-y-3.5"
