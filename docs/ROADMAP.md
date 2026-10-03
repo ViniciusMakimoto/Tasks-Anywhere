@@ -64,7 +64,7 @@
 - [x] **Task 4.1: Autenticação Segura (Supabase Auth)**
   - **Objetivo:** Login simples via Magic Link ou Google no Supabase, vinculando cada tarefa ao `user_id` do usuário.
   - **TDD:** Testar guards de autenticação e persistência de sessão.
-- [ ] **Task 4.2: Migrations SQL & Políticas RLS**
+- [x] **Task 4.2: Migrations SQL & Políticas RLS**
   - **Objetivo:** Script SQL criando a tabela `tasks` com chave estrangeira `user_id`, índices e políticas de isolamento RLS (*Row Level Security*).
 - [ ] **Task 4.3: Storage com Descarte Automático de Mídias**
   - **Objetivo:** Buckets temporários no Supabase Storage para áudios/fotos com exclusão automática após o processamento da IA para economizar cota.
