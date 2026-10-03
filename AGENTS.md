@@ -120,4 +120,9 @@ start/end HTML-comment markers, without disturbing the rest of the file.
 - **Convenções e Regras:** Convenções estabelecidas de código e banco de dados devem ser salvas em `rules/<topico>.md` (`--kind rule`).
 - **Consulta Prévia:** Antes de propor mudanças estruturais ou introduzir novas bibliotecas, consultar o histórico do `ai-memory` para preservar a consistência das decisões anteriores.
 
+### 3. Backlog Oficial & Execução de Tasks
+- **Arquivo Canônico:** O backlog com todos os critérios de aceite e requisitos de TDD está documentado em `docs/ROADMAP.md` e espelhado no `ai-memory` (`architecture/tasks-breakdown.md`).
+- **Execução:** Qualquer agente ou desenvolvedor deve consultar `docs/ROADMAP.md` para entender a próxima tarefa, seguir os testes definidos e marcar como concluída (`- [x]`) ao finalizar.
+
+
 
