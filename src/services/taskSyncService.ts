@@ -13,6 +13,8 @@ export interface DbTask {
   subtasks: Subtask[];
   source: 'manual' | 'audio' | 'image' | 'chat';
   image_url?: string;
+  clarification_needed?: boolean;
+  clarification_question?: string;
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +35,8 @@ export function toDbTask(task: Task, userId: string): DbTask {
     subtasks: task.subtasks || [],
     source: task.source || 'manual',
     image_url: task.imageUrl || undefined,
+    clarification_needed: task.clarificationNeeded,
+    clarification_question: task.clarificationQuestion || undefined,
     created_at: task.createdAt,
     updated_at: task.updatedAt,
   };
@@ -54,6 +58,8 @@ export function fromDbTask(row: DbTask): Task {
     subtasks: (row.subtasks || []) as Subtask[],
     source: row.source || 'manual',
     imageUrl: row.image_url || undefined,
+    clarificationNeeded: row.clarification_needed,
+    clarificationQuestion: row.clarification_question || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

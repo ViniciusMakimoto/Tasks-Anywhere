@@ -76,14 +76,14 @@
 ---
 
 ### Fase 5: Pipeline de IA com Gemini 3.8 Flash
-- [ ] **Task 5.1: Supabase Edge Function (`/process-task-input`)**
+- [x] **Task 5.1: Supabase Edge Function (`/process-task-input`)**
   - **Objetivo:** Endpoint serverless seguro em TypeScript para receber mídia efêmera e acionar a API do Gemini.
-- [ ] **Task 5.2: Extração Estruturada com Gemini Multimodal**
+- [x] **Task 5.2: Extração Estruturada com Gemini Multimodal**
   - **Objetivo:** Processamento de áudios, imagens e textos via Gemini 3.8 Flash com Structured Outputs (JSON Schema/Zod) gerando tarefas com título, descrição, prioridade, data de vencimento e tags.
   - **TDD:** Testes de schema com Zod garantindo que formatos válidos e inválidos da IA sejam tratados sem quebrar a aplicação.
-- [ ] **Task 5.3: Área de Tarefas Incompletas & Esclarecimento da IA**
+- [x] **Task 5.3: Área de Tarefas Incompletas & Esclarecimento da IA**
   - **Objetivo:** Se a entrada for ambígua, a tarefa fica armazenada na aba "Incompletas/Rascunhos" com a pergunta da IA, permitindo responder por texto ou áudio rápido para completar a tarefa.
-- [ ] **Task 5.4: CD das Edge Functions (GitHub Actions)**
+- [x] **Task 5.4: CD das Edge Functions (GitHub Actions)**
   - **Objetivo:** Deploy contínuo das funções serverless da IA (`supabase functions deploy`) no Supabase via GitHub Actions secrets.
 
 ---

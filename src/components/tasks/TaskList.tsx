@@ -15,6 +15,7 @@ export interface TaskListProps {
   onAddSubtask?: (taskId: string, title: string) => void;
   onToggleSubtask?: (taskId: string, subtaskId: string) => void;
   onDeleteSubtask?: (taskId: string, subtaskId: string) => void;
+  onResolveClarification?: (taskId: string, answer: string) => void;
 }
 
 export function TaskList(props: TaskListProps) {
@@ -48,6 +49,7 @@ export function TaskList(props: TaskListProps) {
               onAddSubtask={props.onAddSubtask}
               onToggleSubtask={props.onToggleSubtask}
               onDeleteSubtask={props.onDeleteSubtask}
+              onResolveClarification={props.onResolveClarification}
             />
           )}
         </For>

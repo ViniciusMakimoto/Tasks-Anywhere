@@ -1,9 +1,9 @@
-import { For } from 'solid-js';
+import { For, Show } from 'solid-js';
 import { TaskPriority } from '../../types/task';
 import { Button } from '../ui';
 import { ArrowUpDown, Filter } from 'lucide-solid';
 
-export type StatusFilterType = 'all' | 'pending' | 'completed' | 'today';
+export type StatusFilterType = 'all' | 'pending' | 'completed' | 'today' | 'incomplete';
 export type SortByType = 'urgency' | 'recent';
 
 export interface TaskFiltersProps {
@@ -15,6 +15,7 @@ export interface TaskFiltersProps {
     pending: number;
     completed: number;
     today: number;
+    incomplete?: number;
   };
   onStatusChange?: (status: StatusFilterType) => void;
   onPriorityChange?: (priority: TaskPriority | 'all') => void;
@@ -89,6 +90,20 @@ export function TaskFilters(props: TaskFiltersProps) {
           >
             Hoje ({props.counts.today})
           </button>
+
+          <Show when={(props.counts.incomplete ?? 0) > 0 || props.statusFilter === 'incomplete'}>
+            <button
+              type="button"
+              onClick={() => props.onStatusChange?.('incomplete')}
+              class={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
+                props.statusFilter === 'incomplete'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/50'
+              }`}
+            >
+              <span>Incompletas / IA ({props.counts.incomplete ?? 0})</span>
+            </button>
+          </Show>
         </div>
 
         {/* Sort Toggle Button */}

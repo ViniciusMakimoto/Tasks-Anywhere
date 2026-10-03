@@ -158,6 +158,8 @@ function createTaskStore() {
       updatedAt: now,
       source: input.source || 'manual',
       imageUrl: input.imageUrl,
+      clarificationNeeded: input.clarificationNeeded ?? false,
+      clarificationQuestion: input.clarificationQuestion,
     };
 
     const nextTasks = [newTask, ...tasks()];
@@ -338,12 +340,31 @@ function createTaskStore() {
     }
   }
 
+  function resolveClarification(id: string, answer: string): Task | undefined {
+    const task = tasks().find((t) => t.id === id);
+    if (!task) return undefined;
+
+    const trimmed = answer.trim();
+    const updatedDescription = task.description
+      ? `${task.description}\n\n[Esclarecimento]: ${trimmed}`
+      : `[Esclarecimento]: ${trimmed}`;
+
+    return updateTask(id, {
+      description: updatedDescription,
+      clarificationNeeded: false,
+    });
+  }
+
   // Sinais Derivados (createMemo dentro de createRoot)
   const pendingTasks = createMemo(() => tasks().filter((t) => t.status === 'pending'));
 
   const completedTasks = createMemo(() => tasks().filter((t) => t.status === 'completed'));
 
   const archivedTasks = createMemo(() => tasks().filter((t) => t.status === 'archived'));
+
+  const incompleteTasks = createMemo(() =>
+    tasks().filter((t) => Boolean(t.clarificationNeeded) && t.status !== 'archived')
+  );
 
   const todayTasks = createMemo(() => {
     const today = getTodayDateString();
@@ -363,6 +384,8 @@ function createTaskStore() {
 
   const completedCount = createMemo(() => completedTasks().length);
 
+  const incompleteCount = createMemo(() => incompleteTasks().length);
+
   return {
     tasks,
     setTasks,
@@ -376,17 +399,20 @@ function createTaskStore() {
     addSubtask,
     toggleSubtask,
     deleteSubtask,
+    resolveClarification,
     handleRealtimeTaskChange,
     initCloudSync,
     stopCloudSync,
     pendingTasks,
     completedTasks,
     archivedTasks,
+    incompleteTasks,
     todayTasks,
     todayTasksSorted,
     tasksByPriority,
     pendingCount,
     completedCount,
+    incompleteCount,
   };
 }
 
@@ -403,15 +429,18 @@ export const {
   addSubtask,
   toggleSubtask,
   deleteSubtask,
+  resolveClarification,
   handleRealtimeTaskChange,
   initCloudSync,
   stopCloudSync,
   pendingTasks,
   completedTasks,
   archivedTasks,
+  incompleteTasks,
   todayTasks,
   todayTasksSorted,
   tasksByPriority,
   pendingCount,
   completedCount,
+  incompleteCount,
 } = createRoot(createTaskStore);

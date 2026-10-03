@@ -21,6 +21,9 @@ import {
   initTaskStore,
   clearTasks,
   handleRealtimeTaskChange,
+  resolveClarification,
+  incompleteTasks,
+  incompleteCount,
 } from './taskStore';
 
 describe('TaskStore (SolidJS Signals & Memos)', () => {
@@ -373,6 +376,39 @@ describe('TaskStore (SolidJS Signals & Memos)', () => {
       });
 
       expect(tasks().some((t) => t.id === 'cloud-task-1')).toBe(false);
+    });
+  });
+
+  describe('10. Tarefas Incompletas e Esclarecimento da IA (Task 5.3)', () => {
+    it('deve identificar tarefas que precisam de esclarecimento e contabilizar', () => {
+      addTask({
+        title: 'Comprar presente',
+        clarificationNeeded: true,
+        clarificationQuestion: 'Para quem é o presente e qual o orçamento?',
+      });
+      addTask({
+        title: 'Pagar conta de luz',
+        clarificationNeeded: false,
+      });
+
+      expect(incompleteCount()).toBe(1);
+      expect(incompleteTasks()).toHaveLength(1);
+      expect(incompleteTasks()[0].clarificationQuestion).toBe('Para quem é o presente e qual o orçamento?');
+    });
+
+    it('deve resolver o esclarecimento anexando resposta e removendo flag clarificationNeeded', () => {
+      const task = addTask({
+        title: 'Comprar presente',
+        clarificationNeeded: true,
+        clarificationQuestion: 'Para quem é o presente?',
+      });
+
+      const resolved = resolveClarification(task.id, 'Presente de aniversário para a Maria, até R$ 100');
+
+      expect(resolved).toBeDefined();
+      expect(resolved?.clarificationNeeded).toBe(false);
+      expect(resolved?.description).toContain('Presente de aniversário para a Maria, até R$ 100');
+      expect(incompleteCount()).toBe(0);
     });
   });
 });

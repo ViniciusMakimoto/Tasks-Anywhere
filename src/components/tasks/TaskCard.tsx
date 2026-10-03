@@ -12,6 +12,7 @@ import {
   ChevronUp,
   Plus,
   CheckSquare,
+  Sparkles,
 } from 'lucide-solid';
 
 export interface TaskCardProps {
@@ -23,6 +24,7 @@ export interface TaskCardProps {
   onAddSubtask?: (taskId: string, title: string) => void;
   onToggleSubtask?: (taskId: string, subtaskId: string) => void;
   onDeleteSubtask?: (taskId: string, subtaskId: string) => void;
+  onResolveClarification?: (taskId: string, answer: string) => void;
 }
 
 const priorityConfig: Record<TaskPriority, { variant: 'danger' | 'warning' | 'primary' | 'default'; label: string }> = {
@@ -35,6 +37,15 @@ const priorityConfig: Record<TaskPriority, { variant: 'danger' | 'warning' | 'pr
 export function TaskCard(props: TaskCardProps) {
   const [internalExpanded, setInternalExpanded] = createSignal(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = createSignal('');
+  const [clarificationAnswer, setClarificationAnswer] = createSignal('');
+
+  const handleSendClarification = (e?: Event) => {
+    if (e) e.preventDefault();
+    const ans = clarificationAnswer().trim();
+    if (!ans) return;
+    props.onResolveClarification?.(props.task.id, ans);
+    setClarificationAnswer('');
+  };
 
   const isExpanded = () => (props.isExpanded !== undefined ? props.isExpanded : internalExpanded());
 
@@ -204,6 +215,40 @@ export function TaskCard(props: TaskCardProps) {
           </Button>
         </div>
       </div>
+
+      {/* AI Clarification Banner (Task 5.3) */}
+      <Show when={props.task.clarificationNeeded}>
+        <div class="mt-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-2">
+          <div class="flex items-start gap-2 text-amber-800 dark:text-amber-300 font-medium">
+            <Sparkles class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <div class="space-y-1">
+              <span class="font-semibold block">Dúvida da IA (Gemini):</span>
+              <p class="text-amber-900/90 dark:text-amber-200/90 leading-snug">
+                {props.task.clarificationQuestion || 'Esta tarefa necessita de detalhes adicionais para ser finalizada.'}
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSendClarification} class="flex items-center gap-2 pt-1">
+            <input
+              type="text"
+              value={clarificationAnswer()}
+              onInput={(e) => setClarificationAnswer(e.currentTarget.value)}
+              placeholder="Digite o esclarecimento para a IA..."
+              class="flex-1 px-2.5 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-900 border border-amber-300/60 dark:border-amber-700/60 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            <Button
+              type="submit"
+              size="sm"
+              variant="primary"
+              class="px-3 py-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white shrink-0"
+              disabled={!clarificationAnswer().trim()}
+            >
+              Responder
+            </Button>
+          </form>
+        </div>
+      </Show>
 
       {/* Expanded Details and Subtasks Section */}
       <Show when={isExpanded()}>

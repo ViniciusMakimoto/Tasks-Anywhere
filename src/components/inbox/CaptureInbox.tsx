@@ -4,6 +4,7 @@ import { CreateTaskInput, TaskPriority } from '../../types/task';
 import { AudioRecorder } from './AudioRecorder';
 import { ImageUploader } from './ImageUploader';
 import { fileToDataUrl, extractImageFromClipboard } from '../../services/mediaService';
+import { processMultimodalInput } from '../../services/aiProcessingService';
 import {
   Send,
   Mic,
@@ -12,6 +13,7 @@ import {
   X,
   Tag,
   Sparkles,
+  Loader2,
 } from 'lucide-solid';
 
 export interface DraftTask {
@@ -22,6 +24,8 @@ export interface DraftTask {
   tags: string[];
   source: 'chat' | 'audio' | 'image' | 'manual';
   imageUrl?: string;
+  clarificationNeeded?: boolean;
+  clarificationQuestion?: string;
 }
 
 const priorityConfig: Record<TaskPriority, { variant: 'danger' | 'warning' | 'primary' | 'default'; label: string }> = {
@@ -81,6 +85,7 @@ export function CaptureInbox(props: CaptureInboxProps) {
   const [draft, setDraft] = createSignal<DraftTask | null>(null);
   const [isRecording, setIsRecording] = createSignal(false);
   const [isUploadingImage, setIsUploadingImage] = createSignal(false);
+  const [isAiProcessing, setIsAiProcessing] = createSignal(false);
 
   const handleSendMessage = (e?: Event) => {
     if (e) e.preventDefault();
@@ -90,6 +95,29 @@ export function CaptureInbox(props: CaptureInboxProps) {
     const parsed = parseMessageToDraft(text);
     setDraft(parsed);
     setInputText('');
+  };
+
+  const handleProcessWithAi = async () => {
+    const text = inputText().trim();
+    if (!text || isAiProcessing()) return;
+
+    setIsAiProcessing(true);
+    try {
+      const extracted = await processMultimodalInput({ text });
+      setDraft({
+        title: extracted.title,
+        description: extracted.description,
+        priority: extracted.priority,
+        dueDate: extracted.dueDate,
+        tags: extracted.tags,
+        source: 'chat',
+        clarificationNeeded: extracted.clarificationNeeded,
+        clarificationQuestion: extracted.clarificationQuestion,
+      });
+      setInputText('');
+    } finally {
+      setIsAiProcessing(false);
+    }
   };
 
   const handleConfirmDraft = () => {
@@ -104,6 +132,8 @@ export function CaptureInbox(props: CaptureInboxProps) {
       tags: current.tags,
       source: current.source,
       imageUrl: current.imageUrl,
+      clarificationNeeded: current.clarificationNeeded,
+      clarificationQuestion: current.clarificationQuestion,
     });
 
     setDraft(null);
@@ -195,6 +225,19 @@ export function CaptureInbox(props: CaptureInboxProps) {
                     </span>
                   )}
                 </For>
+              </div>
+            </Show>
+
+            {/* AI Clarification Alert */}
+            <Show when={currentDraft().clarificationNeeded}>
+              <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                <Sparkles class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <span class="font-semibold block">Dúvida da IA (Gemini):</span>
+                  <p class="text-amber-900/90 dark:text-amber-200/90">
+                    {currentDraft().clarificationQuestion || 'A IA precisa de mais detalhes antes de finalizar esta tarefa.'}
+                  </p>
+                </div>
               </div>
             </Show>
 
@@ -307,10 +350,26 @@ export function CaptureInbox(props: CaptureInboxProps) {
           </div>
 
           <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleProcessWithAi}
+            disabled={!inputText().trim() || isAiProcessing()}
+            aria-label="Processar com IA Gemini"
+            title="Extrair tarefa com IA Gemini 3.8 Flash"
+            class="h-8 px-2.5 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 shrink-0 flex items-center gap-1 text-xs font-medium cursor-pointer"
+          >
+            <Show when={isAiProcessing()} fallback={<Sparkles class="w-3.5 h-3.5" />}>
+              <Loader2 class="w-3.5 h-3.5 animate-spin" />
+            </Show>
+            <span class="hidden sm:inline">IA</span>
+          </Button>
+
+          <Button
             type="submit"
             variant="primary"
             size="sm"
-            disabled={!inputText().trim()}
+            disabled={!inputText().trim() || isAiProcessing()}
             aria-label="Enviar mensagem"
             class="h-8 px-3 rounded-xl shrink-0"
           >

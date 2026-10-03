@@ -22,6 +22,8 @@ export interface Task {
   userId?: string;
   source?: 'manual' | 'audio' | 'image' | 'chat';
   imageUrl?: string;
+  clarificationNeeded?: boolean;
+  clarificationQuestion?: string;
 }
 
 export interface CreateTaskInput {
@@ -33,6 +35,8 @@ export interface CreateTaskInput {
   subtasks?: Array<Omit<Subtask, 'id'> | string>;
   source?: 'manual' | 'audio' | 'image' | 'chat';
   imageUrl?: string;
+  clarificationNeeded?: boolean;
+  clarificationQuestion?: string;
 }
 
 export interface UpdateTaskInput {
@@ -42,4 +46,6 @@ export interface UpdateTaskInput {
   priority?: TaskPriority;
   dueDate?: string;
   tags?: string[];
+  clarificationNeeded?: boolean;
+  clarificationQuestion?: string;
 }

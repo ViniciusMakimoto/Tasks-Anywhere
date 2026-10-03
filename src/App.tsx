@@ -12,9 +12,12 @@ import {
   addSubtask,
   toggleSubtask,
   deleteSubtask,
+  resolveClarification,
   pendingCount,
   completedCount,
+  incompleteCount,
   todayTasks,
+  incompleteTasks,
   sortTasksByPriority,
   getTodayDateString,
 } from './store/taskStore';
@@ -143,6 +146,7 @@ export default function App() {
     if (f === 'pending') list = list.filter((t) => t.status === 'pending');
     else if (f === 'completed') list = list.filter((t) => t.status === 'completed');
     else if (f === 'today') list = todayTasks();
+    else if (f === 'incomplete') list = incompleteTasks();
 
     if (p !== 'all') {
       list = list.filter((t) => t.priority === p);
@@ -474,6 +478,7 @@ export default function App() {
               pending: pendingCount(),
               completed: completedCount(),
               today: todayTasks().length,
+              incomplete: incompleteCount(),
             }}
             onStatusChange={(status) => setFilter(status)}
             onPriorityChange={(priority) => setPriorityFilter(priority)}
@@ -495,6 +500,7 @@ export default function App() {
                 onAddSubtask={addSubtask}
                 onToggleSubtask={toggleSubtask}
                 onDeleteSubtask={deleteSubtask}
+                onResolveClarification={resolveClarification}
                 emptyMessage="Nenhuma tarefa nesta visualização"
                 emptyDescription="Adicione uma nova tarefa no campo acima para começar!"
               />
