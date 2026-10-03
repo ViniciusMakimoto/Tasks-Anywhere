@@ -108,5 +108,15 @@ describe('CaptureInbox Component (TDD - Task 3.1)', () => {
       expect(handleTaskCreated).not.toHaveBeenCalled();
       expect(screen.queryByText(/Pré-visualização do Rascunho/i)).not.toBeInTheDocument();
     });
+
+    it('ao clicar no botão de anexar imagem, exibe o componente ImageUploader', async () => {
+      render(() => <CaptureInbox onTaskCreated={vi.fn()} />);
+
+      const attachBtn = screen.getByRole('button', { name: /Anexar imagem/i });
+      await fireEvent.click(attachBtn);
+
+      expect(screen.getByRole('region', { name: /Área de captura de imagem/i })).toBeInTheDocument();
+      expect(screen.getByText(/Clique para selecionar ou arraste uma foto aqui/i)).toBeInTheDocument();
+    });
   });
 });

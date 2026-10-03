@@ -21,6 +21,7 @@ export interface Task {
   updatedAt: string;
   userId?: string;
   source?: 'manual' | 'audio' | 'image' | 'chat';
+  imageUrl?: string;
 }
 
 export interface CreateTaskInput {
@@ -31,6 +32,7 @@ export interface CreateTaskInput {
   tags?: string[];
   subtasks?: Array<Omit<Subtask, 'id'> | string>;
   source?: 'manual' | 'audio' | 'image' | 'chat';
+  imageUrl?: string;
 }
 
 export interface UpdateTaskInput {

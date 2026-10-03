@@ -2,6 +2,8 @@ import { createSignal, Show, For } from 'solid-js';
 import { Card, Button, Badge } from '../ui';
 import { CreateTaskInput, TaskPriority } from '../../types/task';
 import { AudioRecorder } from './AudioRecorder';
+import { ImageUploader } from './ImageUploader';
+import { fileToDataUrl, extractImageFromClipboard } from '../../services/mediaService';
 import {
   Send,
   Mic,
@@ -19,6 +21,7 @@ export interface DraftTask {
   dueDate?: string;
   tags: string[];
   source: 'chat' | 'audio' | 'image' | 'manual';
+  imageUrl?: string;
 }
 
 const priorityConfig: Record<TaskPriority, { variant: 'danger' | 'warning' | 'primary' | 'default'; label: string }> = {
@@ -77,6 +80,7 @@ export function CaptureInbox(props: CaptureInboxProps) {
   const [inputText, setInputText] = createSignal('');
   const [draft, setDraft] = createSignal<DraftTask | null>(null);
   const [isRecording, setIsRecording] = createSignal(false);
+  const [isUploadingImage, setIsUploadingImage] = createSignal(false);
 
   const handleSendMessage = (e?: Event) => {
     if (e) e.preventDefault();
@@ -99,6 +103,7 @@ export function CaptureInbox(props: CaptureInboxProps) {
       dueDate: current.dueDate,
       tags: current.tags,
       source: current.source,
+      imageUrl: current.imageUrl,
     });
 
     setDraft(null);
@@ -112,6 +117,27 @@ export function CaptureInbox(props: CaptureInboxProps) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handlePaste = async (e: ClipboardEvent) => {
+    const image = extractImageFromClipboard(e.clipboardData);
+    if (image) {
+      e.preventDefault();
+      try {
+        const previewUrl = await fileToDataUrl(image);
+        setDraft({
+          title: inputText().trim() || `Imagem anexada (${image.name})`,
+          description: 'Imagem colada pronta para processamento multimodal e extração de tarefas.',
+          priority: 'medium',
+          tags: ['imagem'],
+          source: 'image',
+          imageUrl: previewUrl,
+        });
+        setInputText('');
+      } catch {
+        console.error('Erro ao processar imagem colada do clipboard');
+      }
     }
   };
 
@@ -136,6 +162,16 @@ export function CaptureInbox(props: CaptureInboxProps) {
                 </Badge>
               </div>
             </div>
+
+            <Show when={currentDraft().imageUrl}>
+              <div class="relative w-full max-h-48 rounded-xl overflow-hidden border border-indigo-200/60 dark:border-indigo-800/40 my-2">
+                <img
+                  src={currentDraft().imageUrl!}
+                  alt="Imagem da tarefa"
+                  class="w-full h-auto object-cover max-h-48"
+                />
+              </div>
+            </Show>
 
             <div>
               <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
@@ -190,61 +226,8 @@ export function CaptureInbox(props: CaptureInboxProps) {
         )}
       </Show>
 
-      {/* Main Chat Input Bar or Audio Recorder */}
-      <Show
-        when={isRecording()}
-        fallback={
-          <form
-            onSubmit={handleSendMessage}
-            class="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-xl flex items-center gap-2 transition-all focus-within:border-indigo-500/80 focus-within:ring-2 focus-within:ring-indigo-500/20"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                if (props.onStartAudio) {
-                  props.onStartAudio();
-                }
-                setIsRecording(true);
-              }}
-              aria-label="Gravar áudio"
-              class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
-            >
-              <Mic class="w-4 h-4" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => props.onOpenAttachment?.()}
-              aria-label="Anexar imagem"
-              class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
-            >
-              <ImageIcon class="w-4 h-4" />
-            </button>
-
-            <div class="flex-1 min-w-0">
-              <input
-                type="text"
-                placeholder="Digite sua tarefa, use #tags ou grave um áudio..."
-                value={inputText()}
-                onInput={(e) => setInputText(e.currentTarget.value)}
-                onKeyDown={handleKeyDown}
-                class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none placeholder:text-slate-400 py-1"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="sm"
-              disabled={!inputText().trim()}
-              aria-label="Enviar mensagem"
-              class="h-8 px-3 rounded-xl shrink-0"
-            >
-              <Send class="w-3.5 h-3.5" />
-            </Button>
-          </form>
-        }
-      >
+      {/* Main Chat Input Bar, Audio Recorder or Image Uploader */}
+      <Show when={isRecording()}>
         <AudioRecorder
           onAudioCaptured={(_blob, duration) => {
             setIsRecording(false);
@@ -258,6 +241,82 @@ export function CaptureInbox(props: CaptureInboxProps) {
           }}
           onCancel={() => setIsRecording(false)}
         />
+      </Show>
+
+      <Show when={isUploadingImage()}>
+        <ImageUploader
+          onImageSelected={(file, previewUrl) => {
+            setIsUploadingImage(false);
+            setDraft({
+              title: inputText().trim() || `Imagem anexada (${file.name})`,
+              description: 'Imagem enviada pronta para processamento multimodal e extração de tarefas.',
+              priority: 'medium',
+              tags: ['imagem'],
+              source: 'image',
+              imageUrl: previewUrl,
+            });
+            setInputText('');
+          }}
+          onCancel={() => setIsUploadingImage(false)}
+        />
+      </Show>
+
+      <Show when={!isRecording() && !isUploadingImage()}>
+        <form
+          onSubmit={handleSendMessage}
+          class="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-xl flex items-center gap-2 transition-all focus-within:border-indigo-500/80 focus-within:ring-2 focus-within:ring-indigo-500/20"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              if (props.onStartAudio) {
+                props.onStartAudio();
+              }
+              setIsRecording(true);
+            }}
+            aria-label="Gravar áudio"
+            class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+          >
+            <Mic class="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (props.onOpenAttachment) {
+                props.onOpenAttachment();
+              }
+              setIsUploadingImage(true);
+            }}
+            aria-label="Anexar imagem"
+            class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+          >
+            <ImageIcon class="w-4 h-4" />
+          </button>
+
+          <div class="flex-1 min-w-0">
+            <input
+              type="text"
+              placeholder="Digite sua tarefa, use #tags ou grave um áudio..."
+              value={inputText()}
+              onInput={(e) => setInputText(e.currentTarget.value)}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none placeholder:text-slate-400 py-1"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            disabled={!inputText().trim()}
+            aria-label="Enviar mensagem"
+            class="h-8 px-3 rounded-xl shrink-0"
+          >
+            <Send class="w-3.5 h-3.5" />
+          </Button>
+        </form>
       </Show>
     </div>
   );

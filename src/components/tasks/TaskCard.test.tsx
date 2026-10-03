@@ -162,5 +162,19 @@ describe('TaskCard Component (TDD)', () => {
       expect(screen.queryByText(/Atrasada/i)).not.toBeInTheDocument();
       expect(screen.getByText(yesterday)).toBeInTheDocument();
     });
+
+    it('exibe imagem anexada quando a tarefa possui imageUrl e é expandida', async () => {
+      const taskWithImage: Task = {
+        ...mockTask,
+        imageUrl: 'data:image/png;base64,mockimagedata',
+      };
+
+      render(() => <TaskCard task={taskWithImage} />);
+
+      const expandBtn = screen.getByRole('button', { name: /subtarefas/i });
+      await fireEvent.click(expandBtn);
+
+      expect(screen.getByAltText(new RegExp(`Imagem anexada a ${mockTask.title}`, 'i'))).toBeInTheDocument();
+    });
   });
 });

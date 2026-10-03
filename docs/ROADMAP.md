@@ -54,7 +54,7 @@
 - [x] **Task 3.2: Gravador de Áudio Nativo**
   - **Objetivo:** Gravação pelo microfone via `navigator.mediaDevices.getUserMedia` e `MediaRecorder`. Visualizador com animação de gravação, timer e botões de envio/descarte.
   - **TDD:** Testar fluxo de gravação com mock da API de mídia, controle de estados (gravando, pausado, parado) e geração do Blob de áudio.
-- [ ] **Task 3.3: Captura e Upload de Imagens/Fotos**
+- [x] **Task 3.3: Captura e Upload de Imagens/Fotos**
   - **Objetivo:** Upload de arquivos, suporte a arrastar e soltar (drag & drop), colar imagem do clipboard (`Ctrl+V`) e botão para câmera no mobile.
   - **TDD:** Testar conversão de arquivo e preview da imagem antes do envio.
 

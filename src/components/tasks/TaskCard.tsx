@@ -208,6 +208,17 @@ export function TaskCard(props: TaskCardProps) {
       {/* Expanded Details and Subtasks Section */}
       <Show when={isExpanded()}>
         <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-3 animate-in fade-in duration-150">
+          {/* Attached Image Preview */}
+          <Show when={props.task.imageUrl}>
+            <div class="relative w-full max-h-56 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+              <img
+                src={props.task.imageUrl}
+                alt={`Imagem anexada a ${props.task.title}`}
+                class="w-full h-auto object-cover max-h-56"
+              />
+            </div>
+          </Show>
+
           {/* Detailed Description */}
           <Show when={props.task.description}>
             <div class="bg-slate-50 dark:bg-slate-950/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/50 text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">

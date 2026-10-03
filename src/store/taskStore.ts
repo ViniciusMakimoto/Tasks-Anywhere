@@ -144,6 +144,7 @@ function createTaskStore() {
       createdAt: now,
       updatedAt: now,
       source: input.source || 'manual',
+      imageUrl: input.imageUrl,
     };
 
     const nextTasks = [newTask, ...tasks()];
