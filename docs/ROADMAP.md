@@ -8,7 +8,7 @@
 ## 🗺️ Fases e Detalhamento das Tasks
 
 ### Fase 1: Fundação do Frontend, Reatividade & Suite de Testes (TDD)
-- [ ] **Task 1.1: Setup da Aplicação & Ambiente TDD**
+- [x] **Task 1.1: Setup da Aplicação & Ambiente TDD**
   - **Objetivo:** Inicializar o projeto SolidJS com TypeScript, Vite e Tailwind CSS.
   - **TDD:** Configurar **Vitest** + **@solidjs/testing-library** + **jsdom**. Criar teste de sanidade (`App.test.tsx` e `setupTests.ts`) e validar `npm test`.
   - **Critério de Aceite:** `npm run dev` roda a página de boas-vindas do SolidJS e `npm test` passa 100% dos testes.
