@@ -15,7 +15,7 @@
 - [x] **Task 1.2: Pipeline de Integração Contínua (GitHub Actions)**
   - **Objetivo:** Criar `.github/workflows/ci.yml` para rodar os testes e build automaticamente a cada push/PR.
   - **Critério de Aceite:** Workflow passando no GitHub.
-- [ ] **Task 1.3: Design System & Tokens de Estilo**
+- [x] **Task 1.3: Design System & Tokens de Estilo**
   - **Objetivo:** Criar paleta de cores moderna (tema Dark/Light, estética clean inspirada em Linear/Notion/Spotify) e ícones (Lucide Solid).
   - **TDD:** Testar troca de temas (dark/light) e renderização de componentes base (Botão, Badge, Card).
 - [ ] **Task 1.4: Store Reativa de Tarefas (Fusion Signals)**
