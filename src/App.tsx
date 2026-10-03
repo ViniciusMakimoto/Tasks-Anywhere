@@ -186,30 +186,32 @@ export default function App() {
       <Show
         when={viewMode() === 'full'}
         fallback={
-          <div class="flex-1 flex flex-col items-center justify-center p-4 w-full animate-in fade-in zoom-in-95 duration-200">
-            <StickyWidget
-              tasks={filteredTasks()}
-              isExpandedMode={false}
-              onToggleMode={() => setViewMode('full')}
-              onToggleStatus={toggleTaskStatus}
-              onAddTask={(title) => addTask({ title, priority: 'medium' })}
-              onDelete={deleteTask}
-            />
+          <div class="fixed inset-0 p-3 sm:p-5 flex flex-col items-center justify-center sm:items-end sm:justify-start pointer-events-none z-50">
+            <div class="pointer-events-auto animate-in fade-in zoom-in-95 duration-200">
+              <StickyWidget
+                tasks={filteredTasks()}
+                isExpandedMode={false}
+                onToggleMode={() => setViewMode('full')}
+                onToggleStatus={toggleTaskStatus}
+                onAddTask={(title) => addTask({ title, priority: 'medium' })}
+                onDelete={deleteTask}
+              />
+            </div>
           </div>
         }
       >
-        <div class="max-w-4xl w-full flex flex-col space-y-6">
+        <div class="max-w-5xl xl:max-w-6xl w-full flex flex-col space-y-6 sm:space-y-8">
         {/* Top Navbar */}
-        <header class="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-800/80">
+        <header class="flex items-center justify-between py-3 border-b border-slate-200 dark:border-slate-800/80">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
               <CheckCircle2 class="w-5 h-5" />
             </div>
             <div>
-              <h1 class="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
+              <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
                 TasksAnywhere
               </h1>
-              <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
                 Captura inteligente, modo Sticky Note e reatividade fina por Signals.
               </p>
             </div>
@@ -258,27 +260,27 @@ export default function App() {
         </header>
 
         {/* Overview Stats Bar */}
-        <section class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Card class="p-3.5 flex flex-col justify-between">
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total de Tarefas</span>
-            <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{tasks().length}</div>
+        <section class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
+          <Card class="p-4 sm:p-5 rounded-2xl flex flex-col justify-between">
+            <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Total de Tarefas</span>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">{tasks().length}</div>
           </Card>
 
-          <Card class="p-3.5 flex flex-col justify-between">
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Pendentes</span>
-            <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{pendingCount()}</div>
+          <Card class="p-4 sm:p-5 rounded-2xl flex flex-col justify-between">
+            <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Pendentes</span>
+            <div class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1.5">{pendingCount()}</div>
           </Card>
 
-          <Card class="p-3.5 flex flex-col justify-between">
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Concluídas</span>
-            <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{completedCount()}</div>
+          <Card class="p-4 sm:p-5 rounded-2xl flex flex-col justify-between">
+            <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Concluídas</span>
+            <div class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5">{completedCount()}</div>
           </Card>
 
-          <Card class="p-3.5 flex flex-col justify-between">
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Taxa de Conclusão</span>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-2xl font-bold text-slate-900 dark:text-white">{completionRate()}%</span>
-              <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+          <Card class="p-4 sm:p-5 rounded-2xl flex flex-col justify-between">
+            <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Taxa de Conclusão</span>
+            <div class="flex items-center gap-2 mt-1.5">
+              <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{completionRate()}%</span>
+              <div class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   class="bg-indigo-600 dark:bg-indigo-500 h-full transition-all duration-300 rounded-full"
                   style={{ width: `${completionRate()}%` }}
@@ -292,7 +294,7 @@ export default function App() {
         <section>
           <form
             onSubmit={handleCreateTask}
-            class="p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-lg space-y-3"
+            class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-lg space-y-3.5"
           >
             {/* Primary Input Line */}
             <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -302,7 +304,7 @@ export default function App() {
                   placeholder="Adicionar nova tarefa..."
                   value={newTitle()}
                   onInput={(e) => setNewTitle(e.currentTarget.value)}
-                  class="w-full bg-slate-100 dark:bg-slate-950/70 text-slate-900 dark:text-slate-100 text-sm px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-950 focus:outline-none transition"
+                  class="w-full bg-slate-100 dark:bg-slate-950/70 text-slate-900 dark:text-slate-100 text-sm sm:text-base px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200/80 dark:border-slate-800 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-950 focus:outline-none transition"
                 />
               </div>
 
