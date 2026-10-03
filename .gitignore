@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables & secrets (CRITICAL FOR OPEN SOURCE)
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Production build outputs
+dist/
+dist-ssr/
+build/
+out/
+
+# Tauri
+src-tauri/target/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Editor & OS files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Databases & local caches
+*.sqlite
+*.sqlite3
+*.db
