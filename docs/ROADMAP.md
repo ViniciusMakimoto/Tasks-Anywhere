@@ -33,7 +33,7 @@
 - [x] **Task 2.1: Cards e Lista de Tarefas**
   - **Objetivo:** Componentes de exibição das tarefas (`TaskCard`, `TaskList`) com badges de prioridade, data de vencimento e checklist de subtarefas.
   - **TDD:** `TaskCard.test.tsx` cobrindo cliques de conclusão, expansão de subtarefas e botões de ação rápida.
-- [ ] **Task 2.2: Visão do Dia & Filtros por Prioridade**
+- [x] **Task 2.2: Visão do Dia & Filtros por Prioridade**
   - **Objetivo:** Seção "Tarefas de Hoje" (Today's Focus) e filtros por status e prioridade.
   - **TDD:** Testar filtragem de tarefas do dia e ordenação por urgência.
 - [ ] **Task 2.3: O Modo Sticky Note (Desktop PC)**

@@ -13,6 +13,8 @@ import {
   completedTasks,
   archivedTasks,
   todayTasks,
+  todayTasksSorted,
+  sortTasksByPriority,
   tasksByPriority,
   pendingCount,
   completedCount,
@@ -231,6 +233,40 @@ describe('TaskStore (SolidJS Signals & Memos)', () => {
       expect(tasks()).toHaveLength(1);
       expect(tasks()[0].title).toBe('Carregado do cache');
       expect(tasks()[0].id).toBe('task-123');
+    });
+  });
+
+  describe('7. Ordenação por Urgência e Prioridade', () => {
+    it('deve ordenar tarefas por nível de prioridade (urgent > high > medium > low)', () => {
+      addTask({ title: 'Baixa', priority: 'low' });
+      addTask({ title: 'Urgente', priority: 'urgent' });
+      addTask({ title: 'Média', priority: 'medium' });
+      addTask({ title: 'Alta', priority: 'high' });
+
+      const sorted = sortTasksByPriority(tasks());
+      expect(sorted.map((t) => t.title)).toEqual(['Urgente', 'Alta', 'Média', 'Baixa']);
+    });
+
+    it('deve priorizar tarefas pendentes antes de concluídas na mesma prioridade', () => {
+      addTask({ title: 'Alta Pendente', priority: 'high' });
+      const p2 = addTask({ title: 'Alta Concluída', priority: 'high' });
+      setTaskStatus(p2.id, 'completed');
+
+      const sorted = sortTasksByPriority(tasks());
+      expect(sorted[0].title).toBe('Alta Pendente');
+      expect(sorted[1].title).toBe('Alta Concluída');
+    });
+
+    it('todayTasksSorted deve retornar tarefas do dia ordenadas por urgência', () => {
+      const today = new Date().toISOString().split('T')[0];
+      addTask({ title: 'Hoje Média', priority: 'medium', dueDate: today });
+      addTask({ title: 'Hoje Urgente', priority: 'urgent', dueDate: today });
+      addTask({ title: 'Amanhã Urgente', priority: 'urgent', dueDate: '2099-01-01' });
+
+      const todayList = todayTasksSorted();
+      expect(todayList).toHaveLength(2);
+      expect(todayList[0].title).toBe('Hoje Urgente');
+      expect(todayList[1].title).toBe('Hoje Média');
     });
   });
 });

@@ -3,6 +3,29 @@ import { Task, TaskStatus, TaskPriority, CreateTaskInput, UpdateTaskInput, Subta
 
 const STORAGE_KEY = 'tasksanywhere_tasks';
 
+const priorityWeight: Record<TaskPriority, number> = {
+  urgent: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
+export function sortTasksByPriority(taskList: Task[]): Task[] {
+  return [...taskList].sort((a, b) => {
+    // 1. Status: pendentes antes de concluídas
+    if (a.status !== b.status) {
+      if (a.status === 'completed') return 1;
+      if (b.status === 'completed') return -1;
+    }
+    // 2. Prioridade: maior peso primeiro
+    const weightDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
+    if (weightDiff !== 0) return weightDiff;
+
+    // 3. Critério de desempate: mais recente primeiro
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+}
+
 function generateId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -183,6 +206,8 @@ function createTaskStore() {
     return tasks().filter((t) => t.dueDate === today);
   });
 
+  const todayTasksSorted = createMemo(() => sortTasksByPriority(todayTasks()));
+
   const tasksByPriority = createMemo((): Record<TaskPriority, Task[]> => ({
     urgent: tasks().filter((t) => t.priority === 'urgent'),
     high: tasks().filter((t) => t.priority === 'high'),
@@ -211,6 +236,7 @@ function createTaskStore() {
     completedTasks,
     archivedTasks,
     todayTasks,
+    todayTasksSorted,
     tasksByPriority,
     pendingCount,
     completedCount,
@@ -234,6 +260,7 @@ export const {
   completedTasks,
   archivedTasks,
   todayTasks,
+  todayTasksSorted,
   tasksByPriority,
   pendingCount,
   completedCount,

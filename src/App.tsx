@@ -13,8 +13,15 @@ import {
   pendingCount,
   completedCount,
   todayTasks,
+  sortTasksByPriority,
 } from './store/taskStore';
-import { TaskList } from './components/tasks';
+import {
+  TaskList,
+  TodayFocus,
+  TaskFilters,
+  StatusFilterType,
+  SortByType,
+} from './components/tasks';
 import { TaskPriority } from './types/task';
 import {
   Sun,
@@ -23,13 +30,10 @@ import {
   Calendar,
   CheckCircle2,
   Tag,
-  Sparkles,
   SlidersHorizontal,
   ChevronDown,
   ChevronUp,
 } from 'lucide-solid';
-
-type FilterType = 'all' | 'pending' | 'completed' | 'today';
 
 const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
   { value: 'low', label: 'Baixa' },
@@ -39,7 +43,9 @@ const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
 ];
 
 export default function App() {
-  const [filter, setFilter] = createSignal<FilterType>('all');
+  const [filter, setFilter] = createSignal<StatusFilterType>('all');
+  const [priorityFilter, setPriorityFilter] = createSignal<TaskPriority | 'all'>('all');
+  const [sortBy, setSortBy] = createSignal<SortByType>('recent');
   const [newTitle, setNewTitle] = createSignal('');
   const [newDescription, setNewDescription] = createSignal('');
   const [newTags, setNewTags] = createSignal('');
@@ -77,11 +83,23 @@ export default function App() {
   });
 
   const filteredTasks = createMemo(() => {
-    const list = tasks();
+    let list = tasks();
     const f = filter();
-    if (f === 'pending') return list.filter((t) => t.status === 'pending');
-    if (f === 'completed') return list.filter((t) => t.status === 'completed');
-    if (f === 'today') return todayTasks();
+    const p = priorityFilter();
+    const s = sortBy();
+
+    if (f === 'pending') list = list.filter((t) => t.status === 'pending');
+    else if (f === 'completed') list = list.filter((t) => t.status === 'completed');
+    else if (f === 'today') list = todayTasks();
+
+    if (p !== 'all') {
+      list = list.filter((t) => t.priority === p);
+    }
+
+    if (s === 'urgency') {
+      list = sortTasksByPriority(list);
+    }
+
     return list;
   });
 
@@ -313,78 +331,53 @@ export default function App() {
           </form>
         </section>
 
-        {/* Filter Navigation Tabs */}
-        <section class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800/60 pb-3">
-          <div class="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setFilter('all')}
-              class={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-                filter() === 'all'
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Todas ({tasks().length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFilter('pending')}
-              class={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-                filter() === 'pending'
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Pendentes ({pendingCount()})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFilter('completed')}
-              class={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-                filter() === 'completed'
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Concluídas ({completedCount()})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFilter('today')}
-              class={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-                filter() === 'today'
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Hoje ({todayTasks().length})
-            </button>
-          </div>
-
-          <span class="text-xs text-slate-500 font-mono flex items-center gap-1">
-            <Sparkles class="w-3 h-3 text-indigo-500" />
-            Reatividade granular ativa
-          </span>
+        {/* Task Filters */}
+        <section>
+          <TaskFilters
+            statusFilter={filter()}
+            priorityFilter={priorityFilter()}
+            sortBy={sortBy()}
+            counts={{
+              total: tasks().length,
+              pending: pendingCount(),
+              completed: completedCount(),
+              today: todayTasks().length,
+            }}
+            onStatusChange={(status) => setFilter(status)}
+            onPriorityChange={(priority) => setPriorityFilter(priority)}
+            onSortChange={(sort) => setSortBy(sort)}
+          />
         </section>
 
-        {/* Task List */}
+        {/* Task List / Today Focus */}
         <section>
-          <TaskList
-            tasks={filteredTasks()}
-            expandedTaskId={expandedTaskId()}
-            onToggleExpand={toggleExpand}
-            onToggleStatus={toggleTaskStatus}
-            onDelete={deleteTask}
-            onAddSubtask={addSubtask}
-            onToggleSubtask={toggleSubtask}
-            onDeleteSubtask={deleteSubtask}
-            emptyMessage="Nenhuma tarefa nesta visualização"
-            emptyDescription="Adicione uma nova tarefa no campo acima para começar!"
-          />
+          <Show
+            when={filter() === 'today'}
+            fallback={
+              <TaskList
+                tasks={filteredTasks()}
+                expandedTaskId={expandedTaskId()}
+                onToggleExpand={toggleExpand}
+                onToggleStatus={toggleTaskStatus}
+                onDelete={deleteTask}
+                onAddSubtask={addSubtask}
+                onToggleSubtask={toggleSubtask}
+                onDeleteSubtask={deleteSubtask}
+                emptyMessage="Nenhuma tarefa nesta visualização"
+                emptyDescription="Adicione uma nova tarefa no campo acima para começar!"
+              />
+            }
+          >
+            <TodayFocus
+              tasks={filteredTasks()}
+              onToggleStatus={toggleTaskStatus}
+              onDelete={deleteTask}
+              onToggleExpand={toggleExpand}
+              onAddSubtask={addSubtask}
+              onToggleSubtask={toggleSubtask}
+              onDeleteSubtask={deleteSubtask}
+            />
+          </Show>
         </section>
       </div>
 
