@@ -18,7 +18,7 @@
 - [x] **Task 1.3: Design System & Tokens de Estilo**
   - **Objetivo:** Criar paleta de cores moderna (tema Dark/Light, estética clean inspirada em Linear/Notion/Spotify) e ícones (Lucide Solid).
   - **TDD:** Testar troca de temas (dark/light) e renderização de componentes base (Botão, Badge, Card).
-- [ ] **Task 1.4: Store Reativa de Tarefas (Fusion Signals)**
+- [x] **Task 1.4: Store Reativa de Tarefas (Fusion Signals)**
   - **Objetivo:** Implementar `taskStore.ts` com gerenciamento de estado via `createSignal` e `createMemo`.
   - **TDD:** Escrever `taskStore.test.ts` testando:
     1. Criação de nova tarefa com defaults (status `pending`, prioridade `medium`).

@@ -1,0 +1,240 @@
+import { createSignal, createMemo, createRoot } from 'solid-js';
+import { Task, TaskStatus, TaskPriority, CreateTaskInput, UpdateTaskInput, Subtask } from '../types/task';
+
+const STORAGE_KEY = 'tasksanywhere_tasks';
+
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `task_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+function persist(taskList: Task[]) {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(taskList));
+    } catch (e) {
+      console.error('Falha ao salvar tarefas no localStorage:', e);
+    }
+  }
+}
+
+function createTaskStore() {
+  const [tasks, setTasks] = createSignal<Task[]>([]);
+
+  function initTaskStore(): Task[] {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            setTasks(parsed);
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Falha ao carregar tarefas do localStorage:', e);
+        }
+      }
+    }
+    return tasks();
+  }
+
+  function clearTasks() {
+    setTasks([]);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  function addTask(input: CreateTaskInput): Task {
+    const now = new Date().toISOString();
+
+    const formattedSubtasks: Subtask[] = (input.subtasks || []).map((sub) => {
+      if (typeof sub === 'string') {
+        return { id: generateId(), title: sub, completed: false };
+      }
+      return { id: generateId(), title: sub.title, completed: sub.completed || false };
+    });
+
+    const newTask: Task = {
+      id: generateId(),
+      title: input.title,
+      description: input.description,
+      status: 'pending',
+      priority: input.priority || 'medium',
+      dueDate: input.dueDate,
+      tags: input.tags || [],
+      subtasks: formattedSubtasks,
+      createdAt: now,
+      updatedAt: now,
+      source: input.source || 'manual',
+    };
+
+    const nextTasks = [newTask, ...tasks()];
+    setTasks(nextTasks);
+    persist(nextTasks);
+    return newTask;
+  }
+
+  function updateTask(id: string, updates: UpdateTaskInput): Task | undefined {
+    let updatedTask: Task | undefined;
+
+    const nextTasks = tasks().map((task) => {
+      if (task.id === id) {
+        updatedTask = {
+          ...task,
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        };
+        return updatedTask;
+      }
+      return task;
+    });
+
+    if (updatedTask) {
+      setTasks(nextTasks);
+      persist(nextTasks);
+    }
+
+    return updatedTask;
+  }
+
+  function deleteTask(id: string): boolean {
+    const initialLength = tasks().length;
+    const nextTasks = tasks().filter((task) => task.id !== id);
+
+    if (nextTasks.length !== initialLength) {
+      setTasks(nextTasks);
+      persist(nextTasks);
+      return true;
+    }
+
+    return false;
+  }
+
+  function setTaskStatus(id: string, status: TaskStatus): Task | undefined {
+    return updateTask(id, { status });
+  }
+
+  function toggleTaskStatus(id: string): Task | undefined {
+    const current = tasks().find((t) => t.id === id);
+    if (!current) return undefined;
+
+    const nextStatus: TaskStatus = current.status === 'completed' ? 'pending' : 'completed';
+    return setTaskStatus(id, nextStatus);
+  }
+
+  function addSubtask(taskId: string, title: string): Task | undefined {
+    const task = tasks().find((t) => t.id === taskId);
+    if (!task) return undefined;
+
+    const newSubtask: Subtask = {
+      id: generateId(),
+      title,
+      completed: false,
+    };
+
+    const subtasks = [...task.subtasks, newSubtask];
+    const updated = { ...task, subtasks };
+    const nextTasks = tasks().map((t) => (t.id === taskId ? updated : t));
+    setTasks(nextTasks);
+    persist(nextTasks);
+    return updated;
+  }
+
+  function toggleSubtask(taskId: string, subtaskId: string): Task | undefined {
+    const task = tasks().find((t) => t.id === taskId);
+    if (!task) return undefined;
+
+    const subtasks = task.subtasks.map((sub) =>
+      sub.id === subtaskId ? { ...sub, completed: !sub.completed } : sub
+    );
+
+    const updated = { ...task, subtasks };
+    const nextTasks = tasks().map((t) => (t.id === taskId ? updated : t));
+    setTasks(nextTasks);
+    persist(nextTasks);
+    return updated;
+  }
+
+  function deleteSubtask(taskId: string, subtaskId: string): Task | undefined {
+    const task = tasks().find((t) => t.id === taskId);
+    if (!task) return undefined;
+
+    const subtasks = task.subtasks.filter((sub) => sub.id !== subtaskId);
+    const updated = { ...task, subtasks };
+    const nextTasks = tasks().map((t) => (t.id === taskId ? updated : t));
+    setTasks(nextTasks);
+    persist(nextTasks);
+    return updated;
+  }
+
+  // Sinais Derivados (createMemo dentro de createRoot)
+  const pendingTasks = createMemo(() => tasks().filter((t) => t.status === 'pending'));
+
+  const completedTasks = createMemo(() => tasks().filter((t) => t.status === 'completed'));
+
+  const archivedTasks = createMemo(() => tasks().filter((t) => t.status === 'archived'));
+
+  const todayTasks = createMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return tasks().filter((t) => t.dueDate === today);
+  });
+
+  const tasksByPriority = createMemo((): Record<TaskPriority, Task[]> => ({
+    urgent: tasks().filter((t) => t.priority === 'urgent'),
+    high: tasks().filter((t) => t.priority === 'high'),
+    medium: tasks().filter((t) => t.priority === 'medium'),
+    low: tasks().filter((t) => t.priority === 'low'),
+  }));
+
+  const pendingCount = createMemo(() => pendingTasks().length);
+
+  const completedCount = createMemo(() => completedTasks().length);
+
+  return {
+    tasks,
+    setTasks,
+    initTaskStore,
+    clearTasks,
+    addTask,
+    updateTask,
+    deleteTask,
+    setTaskStatus,
+    toggleTaskStatus,
+    addSubtask,
+    toggleSubtask,
+    deleteSubtask,
+    pendingTasks,
+    completedTasks,
+    archivedTasks,
+    todayTasks,
+    tasksByPriority,
+    pendingCount,
+    completedCount,
+  };
+}
+
+export const {
+  tasks,
+  setTasks,
+  initTaskStore,
+  clearTasks,
+  addTask,
+  updateTask,
+  deleteTask,
+  setTaskStatus,
+  toggleTaskStatus,
+  addSubtask,
+  toggleSubtask,
+  deleteSubtask,
+  pendingTasks,
+  completedTasks,
+  archivedTasks,
+  todayTasks,
+  tasksByPriority,
+  pendingCount,
+  completedCount,
+} = createRoot(createTaskStore);
