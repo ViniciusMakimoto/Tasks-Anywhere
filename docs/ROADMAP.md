@@ -68,9 +68,9 @@
   - **Objetivo:** Script SQL criando a tabela `tasks` com chave estrangeira `user_id`, índices e políticas de isolamento RLS (*Row Level Security*).
 - [x] **Task 4.3: Storage com Descarte Automático de Mídias**
   - **Objetivo:** Buckets temporários no Supabase Storage para áudios/fotos com exclusão automática após o processamento da IA para economizar cota.
-- [ ] **Task 4.4: Sincronização Realtime**
+- [x] **Task 4.4: Sincronização Realtime**
   - **Objetivo:** Conectar a store reativa do SolidJS ao Supabase Realtime para que atualizações no celular reflitam no PC instantaneamente.
-- [ ] **Task 4.5: CD de Migrações do Supabase (GitHub Actions)**
+- [x] **Task 4.5: CD de Migrações do Supabase (GitHub Actions)**
   - **Objetivo:** Pipeline no GitHub Actions para aplicar migrações do banco (`supabase db push`) automaticamente em ambiente de staging/produção a cada push na `main`.
 
 ---

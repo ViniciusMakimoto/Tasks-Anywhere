@@ -1,5 +1,16 @@
 import { createSignal, createMemo, createRoot } from 'solid-js';
 import { Task, TaskStatus, TaskPriority, CreateTaskInput, UpdateTaskInput, Subtask } from '../types/task';
+import { syncTaskToCloud, deleteTaskFromCloud, fetchUserTasks } from '../services/taskSyncService';
+import {
+  setupRealtimeTaskSubscription,
+  unsubscribeRealtimeTaskSubscription,
+} from '../services/realtimeSyncService';
+import type { RealtimeChannel } from '@supabase/supabase-js';
+
+export type RealtimeTaskChangeEvent =
+  | { type: 'INSERT'; task: Task }
+  | { type: 'UPDATE'; task: Task }
+  | { type: 'DELETE'; taskId: string };
 
 const STORAGE_KEY = 'tasksanywhere_tasks';
 
@@ -96,6 +107,8 @@ function persist(taskList: Task[]) {
 
 function createTaskStore() {
   const [tasks, setTasks] = createSignal<Task[]>([]);
+  const [cloudUserId, setCloudUserId] = createSignal<string | null>(null);
+  let activeChannel: RealtimeChannel | null = null;
 
   function initTaskStore(): Task[] {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -150,6 +163,12 @@ function createTaskStore() {
     const nextTasks = [newTask, ...tasks()];
     setTasks(nextTasks);
     persist(nextTasks);
+
+    const uid = cloudUserId();
+    if (uid) {
+      syncTaskToCloud(newTask, uid).catch((err) => console.warn('Erro ao sincronizar nova tarefa:', err));
+    }
+
     return newTask;
   }
 
@@ -171,6 +190,11 @@ function createTaskStore() {
     if (updatedTask) {
       setTasks(nextTasks);
       persist(nextTasks);
+
+      const uid = cloudUserId();
+      if (uid) {
+        syncTaskToCloud(updatedTask, uid).catch((err) => console.warn('Erro ao sincronizar atualização de tarefa:', err));
+      }
     }
 
     return updatedTask;
@@ -183,6 +207,11 @@ function createTaskStore() {
     if (nextTasks.length !== initialLength) {
       setTasks(nextTasks);
       persist(nextTasks);
+
+      const uid = cloudUserId();
+      if (uid) {
+        deleteTaskFromCloud(id).catch((err) => console.warn('Erro ao sincronizar exclusão de tarefa:', err));
+      }
       return true;
     }
 
@@ -246,6 +275,69 @@ function createTaskStore() {
     return updated;
   }
 
+  function handleRealtimeTaskChange(event: RealtimeTaskChangeEvent) {
+    if (event.type === 'INSERT') {
+      const current = tasks();
+      if (!current.some((t) => t.id === event.task.id)) {
+        const next = [event.task, ...current];
+        setTasks(next);
+        persist(next);
+      }
+    } else if (event.type === 'UPDATE') {
+      const next = tasks().map((t) => (t.id === event.task.id ? event.task : t));
+      setTasks(next);
+      persist(next);
+    } else if (event.type === 'DELETE') {
+      const next = tasks().filter((t) => t.id !== event.taskId);
+      setTasks(next);
+      persist(next);
+    }
+  }
+
+  async function initCloudSync(userId: string) {
+    setCloudUserId(userId);
+
+    // 1. Carrega tarefas existentes da nuvem e mescla com locais
+    try {
+      const { data: cloudTasks } = await fetchUserTasks(userId);
+      if (cloudTasks && cloudTasks.length > 0) {
+        const currentMap = new Map(tasks().map((t) => [t.id, t]));
+        for (const ct of cloudTasks) {
+          const local = currentMap.get(ct.id);
+          if (!local || new Date(ct.updatedAt).getTime() >= new Date(local.updatedAt).getTime()) {
+            currentMap.set(ct.id, ct);
+          }
+        }
+        const merged = Array.from(currentMap.values());
+        setTasks(merged);
+        persist(merged);
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar tarefas da nuvem no initCloudSync:', e);
+    }
+
+    // 2. Se já tinha um canal ativo, desinscreve antes
+    if (activeChannel) {
+      await unsubscribeRealtimeTaskSubscription(activeChannel);
+      activeChannel = null;
+    }
+
+    // 3. Inscreve no canal realtime
+    activeChannel = setupRealtimeTaskSubscription(userId, {
+      onInsert: (task) => handleRealtimeTaskChange({ type: 'INSERT', task }),
+      onUpdate: (task) => handleRealtimeTaskChange({ type: 'UPDATE', task }),
+      onDelete: (taskId) => handleRealtimeTaskChange({ type: 'DELETE', taskId }),
+    });
+  }
+
+  async function stopCloudSync() {
+    setCloudUserId(null);
+    if (activeChannel) {
+      await unsubscribeRealtimeTaskSubscription(activeChannel);
+      activeChannel = null;
+    }
+  }
+
   // Sinais Derivados (createMemo dentro de createRoot)
   const pendingTasks = createMemo(() => tasks().filter((t) => t.status === 'pending'));
 
@@ -284,6 +376,9 @@ function createTaskStore() {
     addSubtask,
     toggleSubtask,
     deleteSubtask,
+    handleRealtimeTaskChange,
+    initCloudSync,
+    stopCloudSync,
     pendingTasks,
     completedTasks,
     archivedTasks,
@@ -308,6 +403,9 @@ export const {
   addSubtask,
   toggleSubtask,
   deleteSubtask,
+  handleRealtimeTaskChange,
+  initCloudSync,
+  stopCloudSync,
   pendingTasks,
   completedTasks,
   archivedTasks,

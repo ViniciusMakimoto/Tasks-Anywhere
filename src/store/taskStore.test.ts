@@ -20,6 +20,7 @@ import {
   completedCount,
   initTaskStore,
   clearTasks,
+  handleRealtimeTaskChange,
 } from './taskStore';
 
 describe('TaskStore (SolidJS Signals & Memos)', () => {
@@ -322,6 +323,56 @@ describe('TaskStore (SolidJS Signals & Memos)', () => {
       const sorted = sortTasksByPriority(tasks());
       expect(sorted[0].title).toBe('Atrasada Urgente Mais Antiga');
       expect(sorted[1].title).toBe('Atrasada Média Recente');
+    });
+  });
+
+  describe('9. Sincronização Realtime com a Nuvem (Task 4.4)', () => {
+    it('deve sincronizar tarefas recebidas via Realtime (INSERT, UPDATE, DELETE)', () => {
+      // Inserção remota
+      handleRealtimeTaskChange({
+        type: 'INSERT',
+        task: {
+          id: 'cloud-task-1',
+          title: 'Criada no celular',
+          status: 'pending',
+          priority: 'high',
+          tags: ['mobile'],
+          subtasks: [],
+          createdAt: '2026-10-03T18:00:00Z',
+          updatedAt: '2026-10-03T18:00:00Z',
+        },
+      });
+
+      expect(tasks().some((t) => t.id === 'cloud-task-1')).toBe(true);
+      expect(tasks().find((t) => t.id === 'cloud-task-1')?.title).toBe('Criada no celular');
+
+      // Atualização remota
+      handleRealtimeTaskChange({
+        type: 'UPDATE',
+        task: {
+          id: 'cloud-task-1',
+          title: 'Atualizada no celular',
+          status: 'completed',
+          priority: 'urgent',
+          tags: ['mobile'],
+          subtasks: [],
+          createdAt: '2026-10-03T18:00:00Z',
+          updatedAt: '2026-10-03T18:05:00Z',
+        },
+      });
+
+      const updated = tasks().find((t) => t.id === 'cloud-task-1');
+      expect(updated?.title).toBe('Atualizada no celular');
+      expect(updated?.status).toBe('completed');
+      expect(updated?.priority).toBe('urgent');
+
+      // Deleção remota
+      handleRealtimeTaskChange({
+        type: 'DELETE',
+        taskId: 'cloud-task-1',
+      });
+
+      expect(tasks().some((t) => t.id === 'cloud-task-1')).toBe(false);
     });
   });
 });

@@ -1,9 +1,11 @@
-import { createSignal, createMemo, onMount, For, Show } from 'solid-js';
+import { createSignal, createMemo, createEffect, onMount, For, Show } from 'solid-js';
 import { Button, Card } from './components/ui';
 import { theme, toggleTheme, initTheme } from './theme/theme';
 import {
   tasks,
   initTaskStore,
+  initCloudSync,
+  stopCloudSync,
   addTask,
   deleteTask,
   toggleTaskStatus,
@@ -106,6 +108,15 @@ export default function App() {
     if (notifSettings.enabled && hasNotificationPermission()) {
       setNotifEnabled(true);
       dispatchTaskReminders(tasks());
+    }
+  });
+
+  createEffect(() => {
+    const currentUser = user();
+    if (currentUser?.id) {
+      initCloudSync(currentUser.id);
+    } else {
+      stopCloudSync();
     }
   });
 
