@@ -48,10 +48,10 @@
 ---
 
 ### Fase 3: Captura Rápida Multimodal & Fluxo de Inbox/Chat
-- [ ] **Task 3.1: Inbox de Captura Rápida (Entrada estilo Chat)**
+- [x] **Task 3.1: Inbox de Captura Rápida (Entrada estilo Chat)**
   - **Objetivo:** Interface estilo chat/barra de entrada onde mensagens, áudios e fotos geram pré-visualizações antes de confirmar a criação da tarefa.
   - **TDD:** Testar transição de estado da mensagem para rascunho de tarefa.
-- [ ] **Task 3.2: Gravador de Áudio Nativo**
+- [x] **Task 3.2: Gravador de Áudio Nativo**
   - **Objetivo:** Gravação pelo microfone via `navigator.mediaDevices.getUserMedia` e `MediaRecorder`. Visualizador com animação de gravação, timer e botões de envio/descarte.
   - **TDD:** Testar fluxo de gravação com mock da API de mídia, controle de estados (gravando, pausado, parado) e geração do Blob de áudio.
 - [ ] **Task 3.3: Captura e Upload de Imagens/Fotos**

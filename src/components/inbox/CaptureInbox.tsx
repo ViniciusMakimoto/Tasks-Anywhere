@@ -1,6 +1,7 @@
 import { createSignal, Show, For } from 'solid-js';
 import { Card, Button, Badge } from '../ui';
 import { CreateTaskInput, TaskPriority } from '../../types/task';
+import { AudioRecorder } from './AudioRecorder';
 import {
   Send,
   Mic,
@@ -75,6 +76,7 @@ export interface CaptureInboxProps {
 export function CaptureInbox(props: CaptureInboxProps) {
   const [inputText, setInputText] = createSignal('');
   const [draft, setDraft] = createSignal<DraftTask | null>(null);
+  const [isRecording, setIsRecording] = createSignal(false);
 
   const handleSendMessage = (e?: Event) => {
     if (e) e.preventDefault();
@@ -188,51 +190,75 @@ export function CaptureInbox(props: CaptureInboxProps) {
         )}
       </Show>
 
-      {/* Main Chat Input Bar */}
-      <form
-        onSubmit={handleSendMessage}
-        class="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-xl flex items-center gap-2 transition-all focus-within:border-indigo-500/80 focus-within:ring-2 focus-within:ring-indigo-500/20"
+      {/* Main Chat Input Bar or Audio Recorder */}
+      <Show
+        when={isRecording()}
+        fallback={
+          <form
+            onSubmit={handleSendMessage}
+            class="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-xl flex items-center gap-2 transition-all focus-within:border-indigo-500/80 focus-within:ring-2 focus-within:ring-indigo-500/20"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                if (props.onStartAudio) {
+                  props.onStartAudio();
+                }
+                setIsRecording(true);
+              }}
+              aria-label="Gravar áudio"
+              class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+            >
+              <Mic class="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => props.onOpenAttachment?.()}
+              aria-label="Anexar imagem"
+              class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+            >
+              <ImageIcon class="w-4 h-4" />
+            </button>
+
+            <div class="flex-1 min-w-0">
+              <input
+                type="text"
+                placeholder="Digite sua tarefa, use #tags ou grave um áudio..."
+                value={inputText()}
+                onInput={(e) => setInputText(e.currentTarget.value)}
+                onKeyDown={handleKeyDown}
+                class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none placeholder:text-slate-400 py-1"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={!inputText().trim()}
+              aria-label="Enviar mensagem"
+              class="h-8 px-3 rounded-xl shrink-0"
+            >
+              <Send class="w-3.5 h-3.5" />
+            </Button>
+          </form>
+        }
       >
-        <button
-          type="button"
-          onClick={() => props.onStartAudio?.()}
-          aria-label="Gravar áudio"
-          class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
-        >
-          <Mic class="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => props.onOpenAttachment?.()}
-          aria-label="Anexar imagem"
-          class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
-        >
-          <ImageIcon class="w-4 h-4" />
-        </button>
-
-        <div class="flex-1 min-w-0">
-          <input
-            type="text"
-            placeholder="Digite sua tarefa, use #tags ou grave um áudio..."
-            value={inputText()}
-            onInput={(e) => setInputText(e.currentTarget.value)}
-            onKeyDown={handleKeyDown}
-            class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none placeholder:text-slate-400 py-1"
-          />
-        </div>
-
-        <Button
-          type="submit"
-          variant="primary"
-          size="sm"
-          disabled={!inputText().trim()}
-          aria-label="Enviar mensagem"
-          class="h-8 px-3 rounded-xl shrink-0"
-        >
-          <Send class="w-3.5 h-3.5" />
-        </Button>
-      </form>
+        <AudioRecorder
+          onAudioCaptured={(_blob, duration) => {
+            setIsRecording(false);
+            setDraft({
+              title: `Gravação de voz (${duration}s)`,
+              description: 'Nota de voz capturada pronta para transcrição por IA.',
+              priority: 'medium',
+              tags: ['audio'],
+              source: 'audio',
+            });
+          }}
+          onCancel={() => setIsRecording(false)}
+        />
+      </Show>
     </div>
   );
 }
