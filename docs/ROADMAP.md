@@ -36,13 +36,13 @@
 - [x] **Task 2.2: Visão do Dia & Filtros por Prioridade**
   - **Objetivo:** Seção "Tarefas de Hoje" (Today's Focus) e filtros por status e prioridade.
   - **TDD:** Testar filtragem de tarefas do dia e ordenação por urgência.
-- [ ] **Task 2.3: O Modo Sticky Note (Desktop PC)**
+- [x] **Task 2.3: O Modo Sticky Note (Desktop PC)**
   - **Objetivo:** Visualizador ultra-compacto estilo widget/mini-player, sem distrações, projetado para ficar no canto da tela com botão para alternar entre "Mini Note" e "Modo Expandido".
   - **TDD:** Testar toggle de layout (compact vs expanded) e responsividade do container.
-- [ ] **Task 2.4: Notificações & Lembretes Antecipados**
+- [x] **Task 2.4: Notificações & Lembretes Antecipados**
   - **Objetivo:** Integração com Notification API do navegador/sistema com configuração global de aviso (ex: 12h antes do vencimento).
   - **TDD:** Testar cálculo de disparos de lembretes e permissão de notificações.
-- [ ] **Task 2.5: PWA (Mobile Ready) & CD no GitHub Pages**
+- [x] **Task 2.5: PWA (Mobile Ready) & CD no GitHub Pages**
   - **Objetivo:** Configuração de `manifest.json`, Service Worker para instalação no celular ("Adicionar à Tela de Início") e pipeline de CD no GitHub Actions para deploy automático no GitHub Pages a cada push na `main`.
 
 ---
