@@ -25,6 +25,8 @@ import {
 } from './components/tasks';
 import { StickyWidget } from './components/sticky';
 import { CaptureInbox } from './components/inbox';
+import { AuthModal } from './components/auth';
+import { user, isAuthenticated, signOut, initAuth } from './store/authStore';
 import {
   hasNotificationPermission,
   requestNotificationPermission,
@@ -45,6 +47,8 @@ import {
   ChevronUp,
   Pin,
   Bell,
+  Cloud,
+  LogOut,
 } from 'lucide-solid';
 
 const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
@@ -67,9 +71,11 @@ export default function App() {
   const [newDueDate, setNewDueDate] = createSignal('');
   const [showDetails, setShowDetails] = createSignal(false);
   const [expandedTaskId, setExpandedTaskId] = createSignal<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = createSignal(false);
 
   onMount(() => {
     initTheme();
+    initAuth();
     const existing = initTaskStore();
     // Se não houver tarefas salvas, inicializa com 3 tarefas de demonstração para localhost
     if (existing.length === 0) {
@@ -219,6 +225,39 @@ export default function App() {
           </div>
 
           <div class="flex items-center gap-2">
+            {/* Supabase Cloud Sync / Auth Button */}
+            <Show
+              when={isAuthenticated()}
+              fallback={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAuthModal(true)}
+                  aria-label="Conectar conta Supabase"
+                  class="border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-indigo-500/50 text-xs px-2.5 py-1.5"
+                >
+                  <Cloud class="w-4 h-4 text-indigo-500" />
+                  <span class="ml-1 text-xs hidden sm:inline">Sincronizar Nuvem</span>
+                </Button>
+              }
+            >
+              <div class="flex items-center gap-1.5 border border-indigo-500/30 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl px-2.5 py-1 text-xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span class="text-indigo-600 dark:text-indigo-400 font-medium truncate max-w-[120px] hidden sm:inline">
+                  {user()?.email?.split('@')[0]}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  title="Sair da conta"
+                  aria-label="Desconectar conta"
+                  class="text-slate-400 hover:text-rose-500 p-1 cursor-pointer transition"
+                >
+                  <LogOut class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </Show>
+
             <Button
               variant="ghost"
               size="sm"
@@ -468,6 +507,12 @@ export default function App() {
       <footer class="mt-8 text-xs text-slate-400 dark:text-slate-600 text-center">
         TasksAnywhere © 2026 • Powered by SolidJS Fusion Signals • TDD Rigoroso
       </footer>
+
+      {/* Cloud Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal()}
+        onClose={() => setShowAuthModal(false)}
+      />
     </main>
   );
 }

@@ -61,7 +61,7 @@
 ---
 
 ### Fase 4: Backend na Nuvem com Supabase (24/7)
-- [ ] **Task 4.1: Autenticação Segura (Supabase Auth)**
+- [x] **Task 4.1: Autenticação Segura (Supabase Auth)**
   - **Objetivo:** Login simples via Magic Link ou Google no Supabase, vinculando cada tarefa ao `user_id` do usuário.
   - **TDD:** Testar guards de autenticação e persistência de sessão.
 - [ ] **Task 4.2: Migrations SQL & Políticas RLS**

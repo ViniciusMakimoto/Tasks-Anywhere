@@ -13,6 +13,7 @@
     "verify:credentials": "node scripts/verify-credentials.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "lucide-solid": "^1.50.0",
     "solid-js": "^1.9.5"
   },
