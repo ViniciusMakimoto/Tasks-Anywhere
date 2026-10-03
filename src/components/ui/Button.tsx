@@ -10,10 +10,10 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 
 const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary: 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white shadow-sm shadow-indigo-950/40 focus:ring-indigo-500',
-  secondary: 'bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-100 border border-slate-700/60 focus:ring-slate-500',
-  ghost: 'bg-transparent hover:bg-slate-800/60 active:bg-slate-800 text-slate-300 hover:text-white focus:ring-slate-500',
+  secondary: 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 active:bg-slate-300 dark:active:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700/60 focus:ring-slate-500',
+  ghost: 'bg-transparent hover:bg-slate-200/60 dark:hover:bg-slate-800/60 active:bg-slate-200 dark:active:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white focus:ring-slate-500',
   danger: 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-sm shadow-rose-950/40 focus:ring-rose-500',
-  outline: 'bg-transparent border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white focus:ring-slate-500',
+  outline: 'bg-transparent border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white focus:ring-slate-500',
 };
 
 const sizeStyles: Record<NonNullable<ButtonProps['size']>, string> = {

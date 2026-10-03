@@ -7,10 +7,10 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 const cardVariants: Record<NonNullable<CardProps['variant']>, string> = {
-  default: 'bg-slate-900/80 border border-slate-800/80 shadow-sm text-slate-100',
-  glass: 'bg-slate-900/40 backdrop-blur-md border border-slate-700/40 shadow-lg text-slate-100',
-  interactive: 'bg-slate-900/80 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/60 hover:shadow-md cursor-pointer active:scale-[0.99] text-slate-100',
-  flat: 'bg-slate-900/50 text-slate-100',
+  default: 'bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 shadow-sm text-slate-900 dark:text-slate-100',
+  glass: 'bg-white/70 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/40 shadow-lg text-slate-900 dark:text-slate-100',
+  interactive: 'bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:shadow-md cursor-pointer active:scale-[0.99] text-slate-900 dark:text-slate-100',
+  flat: 'bg-slate-100 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100',
 };
 
 export function Card(props: CardProps) {

@@ -43,6 +43,28 @@ describe('App Main UI & Integration Test (TDD)', () => {
     expect(screen.getByText('Comprar café especial')).toBeInTheDocument();
   });
 
+  it('permite adicionar descrição e tags opcionais ao criar uma tarefa', async () => {
+    render(() => <App />);
+
+    const detailsBtn = screen.getByRole('button', { name: /Opções|Detalhes/i });
+    await fireEvent.click(detailsBtn);
+
+    const titleInput = screen.getByPlaceholderText(/Adicionar nova tarefa/i);
+    const descInput = screen.getByRole('textbox', { name: /Descrição da tarefa/i });
+    const tagsInput = screen.getByRole('textbox', { name: /Tags da tarefa/i });
+    const submitBtn = screen.getByRole('button', { name: /Adicionar/i });
+
+    await fireEvent.input(titleInput, { target: { value: 'Tarefa Completa' } });
+    await fireEvent.input(descInput, { target: { value: 'Uma descrição detalhada da tarefa' } });
+    await fireEvent.input(tagsInput, { target: { value: 'frontend, urgente' } });
+    await fireEvent.click(submitBtn);
+
+    expect(screen.getByText('Tarefa Completa')).toBeInTheDocument();
+    expect(screen.getByText('Uma descrição detalhada da tarefa')).toBeInTheDocument();
+    expect(screen.getByText('frontend')).toBeInTheDocument();
+    expect(screen.getByText('urgente')).toBeInTheDocument();
+  });
+
   it('permite alternar o status de conclusão de uma tarefa na lista', async () => {
     render(() => <App />);
 
