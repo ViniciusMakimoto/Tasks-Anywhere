@@ -10,18 +10,69 @@ const priorityWeight: Record<TaskPriority, number> = {
   low: 1,
 };
 
+export function getTodayDateString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function sortTasksByPriority(taskList: Task[]): Task[] {
+  const today = getTodayDateString();
+
   return [...taskList].sort((a, b) => {
     // 1. Status: pendentes antes de concluídas
     if (a.status !== b.status) {
       if (a.status === 'completed') return 1;
       if (b.status === 'completed') return -1;
     }
-    // 2. Prioridade: maior peso primeiro
-    const weightDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
-    if (weightDiff !== 0) return weightDiff;
 
-    // 3. Critério de desempate: mais recente primeiro
+    // 2. Classificação por Prazo / Urgência Real (Opção 1)
+    // Tier 0: Atrasadas (dueDate < today)
+    // Tier 1: Vencem Hoje (dueDate === today)
+    // Tier 2: Próximos dias (dueDate > today)
+    // Tier 3: Sem prazo definido (Backlog)
+    const getTier = (t: Task): number => {
+      if (!t.dueDate) return 3;
+      if (t.dueDate < today) return 0;
+      if (t.dueDate === today) return 1;
+      return 2;
+    };
+
+    const tierA = getTier(a);
+    const tierB = getTier(b);
+
+    if (tierA !== tierB) {
+      return tierA - tierB;
+    }
+
+    // Dentro do mesmo Tier:
+    if (tierA === 0) {
+      // Atrasadas: maior prioridade primeiro; se empatar prioridade, data mais antiga primeiro
+      const weightDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
+      if (weightDiff !== 0) return weightDiff;
+      if (a.dueDate && b.dueDate && a.dueDate !== b.dueDate) {
+        return a.dueDate.localeCompare(b.dueDate);
+      }
+    } else if (tierA === 1) {
+      // Vencem Hoje: maior prioridade primeiro
+      const weightDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
+      if (weightDiff !== 0) return weightDiff;
+    } else if (tierA === 2) {
+      // Próximos dias: cronológico mais próximo primeiro; se mesma data, maior prioridade
+      if (a.dueDate && b.dueDate && a.dueDate !== b.dueDate) {
+        return a.dueDate.localeCompare(b.dueDate);
+      }
+      const weightDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
+      if (weightDiff !== 0) return weightDiff;
+    } else if (tierA === 3) {
+      // Sem data (Backlog): maior prioridade primeiro
+      const weightDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
+      if (weightDiff !== 0) return weightDiff;
+    }
+
+    // 3. Critério final de desempate: mais recente criado primeiro
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 }
@@ -202,7 +253,7 @@ function createTaskStore() {
   const archivedTasks = createMemo(() => tasks().filter((t) => t.status === 'archived'));
 
   const todayTasks = createMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayDateString();
     return tasks().filter((t) => t.dueDate === today);
   });
 

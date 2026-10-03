@@ -268,5 +268,60 @@ describe('TaskStore (SolidJS Signals & Memos)', () => {
       expect(todayList[0].title).toBe('Hoje Urgente');
       expect(todayList[1].title).toBe('Hoje Média');
     });
+
+    it('deve priorizar prazos reais na ordenação de urgência: Atrasadas > Hoje > Próximas > Sem Prazo (Backlog)', () => {
+      // Datas relativas
+      const now = new Date();
+      const format = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const yesterday = format(new Date(now.getTime() - 86400000));
+      const today = format(now);
+      const tomorrow = format(new Date(now.getTime() + 86400000));
+      const nextWeek = format(new Date(now.getTime() + 7 * 86400000));
+
+      addTask({ title: 'Sem Data Urgente', priority: 'urgent' });
+      addTask({ title: 'Atrasada Média', priority: 'medium', dueDate: yesterday });
+      addTask({ title: 'Hoje Alta', priority: 'high', dueDate: today });
+      addTask({ title: 'Sem Data Baixa', priority: 'low' });
+      addTask({ title: 'Amanhã Baixa', priority: 'low', dueDate: tomorrow });
+      addTask({ title: 'Semana Que Vem Urgente', priority: 'urgent', dueDate: nextWeek });
+
+      const sorted = sortTasksByPriority(tasks());
+      const titles = sorted.map((t) => t.title);
+
+      expect(titles).toEqual([
+        'Atrasada Média',
+        'Hoje Alta',
+        'Amanhã Baixa',
+        'Semana Que Vem Urgente',
+        'Sem Data Urgente',
+        'Sem Data Baixa',
+      ]);
+    });
+
+    it('entre tarefas atrasadas, prioriza a maior urgência e data mais antiga', () => {
+      const now = new Date();
+      const format = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const twoDaysAgo = format(new Date(now.getTime() - 2 * 86400000));
+      const yesterday = format(new Date(now.getTime() - 86400000));
+
+      addTask({ title: 'Atrasada Média Recente', priority: 'medium', dueDate: yesterday });
+      addTask({ title: 'Atrasada Urgente Mais Antiga', priority: 'urgent', dueDate: twoDaysAgo });
+
+      const sorted = sortTasksByPriority(tasks());
+      expect(sorted[0].title).toBe('Atrasada Urgente Mais Antiga');
+      expect(sorted[1].title).toBe('Atrasada Média Recente');
+    });
   });
 });

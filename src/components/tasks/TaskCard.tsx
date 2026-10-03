@@ -1,6 +1,7 @@
 import { createSignal, createMemo, Show, For } from 'solid-js';
 import { Card, Badge, Button } from '../ui';
 import { Task, TaskPriority } from '../../types/task';
+import { getTodayDateString } from '../../store/taskStore';
 import {
   CheckCircle2,
   Circle,
@@ -46,6 +47,29 @@ export function TaskCard(props: TaskCardProps) {
   };
 
   const priorityMeta = () => priorityConfig[props.task.priority] || priorityConfig.medium;
+
+  const dueDateInfo = createMemo(() => {
+    if (!props.task.dueDate) return null;
+    const today = getTodayDateString();
+    const isCompleted = props.task.status === 'completed';
+
+    if (!isCompleted && props.task.dueDate < today) {
+      return {
+        variant: 'danger' as const,
+        label: `Atrasada • ${props.task.dueDate}`,
+      };
+    }
+    if (!isCompleted && props.task.dueDate === today) {
+      return {
+        variant: 'primary' as const,
+        label: 'Hoje',
+      };
+    }
+    return {
+      variant: 'default' as const,
+      label: props.task.dueDate,
+    };
+  });
 
   const completedSubtasksCount = createMemo(() => {
     return (props.task.subtasks || []).filter((s) => s.completed).length;
@@ -116,11 +140,13 @@ export function TaskCard(props: TaskCardProps) {
               </Badge>
 
               {/* Due Date Badge */}
-              <Show when={props.task.dueDate}>
-                <Badge variant="default" size="sm" class="font-mono text-[10px]">
-                  <Calendar class="w-3 h-3 mr-0.5 text-slate-400" />
-                  {props.task.dueDate}
-                </Badge>
+              <Show when={dueDateInfo()}>
+                {(info) => (
+                  <Badge variant={info().variant} size="sm" class="font-mono text-[10px]">
+                    <Calendar class="w-3 h-3 mr-0.5" />
+                    {info().label}
+                  </Badge>
+                )}
               </Show>
 
               {/* Subtasks Progress Badge */}

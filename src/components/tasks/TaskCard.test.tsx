@@ -125,4 +125,42 @@ describe('TaskCard Component (TDD)', () => {
 
     expect(handleDelete).toHaveBeenCalledWith('task-1');
   });
+
+  describe('Destaques visuais de Prazos (Atrasada / Hoje / Futuro)', () => {
+    const getFormattedDate = (offsetDays: number) => {
+      const d = new Date(Date.now() + offsetDays * 86400000);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    it('exibe badge de atrasada em destaque quando dueDate é anterior a hoje e tarefa pendente', () => {
+      const yesterday = getFormattedDate(-1);
+      const overdueTask: Task = { ...mockTask, dueDate: yesterday, status: 'pending' };
+
+      render(() => <TaskCard task={overdueTask} />);
+
+      expect(screen.getByText(new RegExp(`Atrasada • ${yesterday}`, 'i'))).toBeInTheDocument();
+    });
+
+    it('exibe badge "Hoje" quando dueDate é o dia atual', () => {
+      const today = getFormattedDate(0);
+      const todayTask: Task = { ...mockTask, dueDate: today, status: 'pending' };
+
+      render(() => <TaskCard task={todayTask} />);
+
+      expect(screen.getByText(/Hoje/i)).toBeInTheDocument();
+    });
+
+    it('não exibe rótulo de "Atrasada" se a tarefa já estiver concluída', () => {
+      const yesterday = getFormattedDate(-1);
+      const completedOverdueTask: Task = { ...mockTask, dueDate: yesterday, status: 'completed' };
+
+      render(() => <TaskCard task={completedOverdueTask} />);
+
+      expect(screen.queryByText(/Atrasada/i)).not.toBeInTheDocument();
+      expect(screen.getByText(yesterday)).toBeInTheDocument();
+    });
+  });
 });

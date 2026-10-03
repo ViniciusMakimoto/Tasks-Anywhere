@@ -14,6 +14,7 @@ import {
   completedCount,
   todayTasks,
   sortTasksByPriority,
+  getTodayDateString,
 } from './store/taskStore';
 import {
   TaskList,
@@ -59,7 +60,7 @@ export default function App() {
     const existing = initTaskStore();
     // Se não houver tarefas salvas, inicializa com 3 tarefas de demonstração para localhost
     if (existing.length === 0) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayDateString();
       addTask({
         title: 'Explorar o Modo Sticky Note no desktop',
         description: 'Janela flutuante always-on-top compacta estilo widget para produtividade.',
