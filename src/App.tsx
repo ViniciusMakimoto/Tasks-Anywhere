@@ -23,6 +23,7 @@ import {
   StatusFilterType,
   SortByType,
 } from './components/tasks';
+import { StickyWidget } from './components/sticky';
 import { TaskPriority } from './types/task';
 import {
   Sun,
@@ -34,6 +35,7 @@ import {
   SlidersHorizontal,
   ChevronDown,
   ChevronUp,
+  Pin,
 } from 'lucide-solid';
 
 const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
@@ -44,6 +46,7 @@ const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
 ];
 
 export default function App() {
+  const [viewMode, setViewMode] = createSignal<'full' | 'sticky'>('full');
   const [filter, setFilter] = createSignal<StatusFilterType>('all');
   const [priorityFilter, setPriorityFilter] = createSignal<TaskPriority | 'all'>('all');
   const [sortBy, setSortBy] = createSignal<SortByType>('recent');
@@ -149,8 +152,23 @@ export default function App() {
         <div class="absolute top-1/2 -left-40 w-[400px] h-[400px] bg-purple-500/10 dark:bg-purple-600/15 blur-[120px] rounded-full" />
       </div>
 
-      {/* Main Container */}
-      <div class="max-w-4xl w-full flex flex-col space-y-6">
+      {/* Main Container or Sticky View */}
+      <Show
+        when={viewMode() === 'full'}
+        fallback={
+          <div class="flex-1 flex flex-col items-center justify-center p-4 w-full animate-in fade-in zoom-in-95 duration-200">
+            <StickyWidget
+              tasks={filteredTasks()}
+              isExpandedMode={false}
+              onToggleMode={() => setViewMode('full')}
+              onToggleStatus={toggleTaskStatus}
+              onAddTask={(title) => addTask({ title, priority: 'medium' })}
+              onDelete={deleteTask}
+            />
+          </div>
+        }
+      >
+        <div class="max-w-4xl w-full flex flex-col space-y-6">
         {/* Top Navbar */}
         <header class="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-800/80">
           <div class="flex items-center gap-3">
@@ -168,6 +186,17 @@ export default function App() {
           </div>
 
           <div class="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode('sticky')}
+              aria-label="Modo Sticky Note"
+              class="border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-amber-500/50"
+            >
+              <Pin class="w-4 h-4 text-amber-500" />
+              <span class="ml-1 text-xs hidden sm:inline">Modo Sticky Note</span>
+            </Button>
+
             <Button
               variant="ghost"
               size="sm"
@@ -381,6 +410,7 @@ export default function App() {
           </Show>
         </section>
       </div>
+      </Show>
 
       {/* Footer */}
       <footer class="mt-8 text-xs text-slate-400 dark:text-slate-600 text-center">

@@ -100,4 +100,19 @@ describe('App Main UI & Integration Test (TDD)', () => {
 
     expect(screen.queryByText('Tarefa temporária')).not.toBeInTheDocument();
   });
+
+  it('permite alternar para o Modo Sticky Note compacto e voltar para o modo expandido', async () => {
+    render(() => <App />);
+
+    const stickyToggleBtn = screen.getByRole('button', { name: /^Modo Sticky Note$/i });
+    await fireEvent.click(stickyToggleBtn);
+
+    expect(screen.getByRole('heading', { level: 2, name: /Sticky Note/i })).toBeInTheDocument();
+
+    const expandBtn = screen.getByRole('button', { name: /Alternar para modo expandido|Expandir tela/i });
+    await fireEvent.click(expandBtn);
+
+    expect(screen.getByRole('heading', { level: 1, name: /TasksAnywhere/i })).toBeInTheDocument();
+  });
 });
+
