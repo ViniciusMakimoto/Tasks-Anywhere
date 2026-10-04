@@ -36,7 +36,17 @@ export const AuthModal = (props: AuthModalProps) => {
     setErrorMessage(null);
     const { error } = await signInWithOAuth('google');
     if (error) {
-      setErrorMessage(error.message || 'Erro ao conectar com Google.');
+      if (
+        error.message?.includes('provider is not enabled') ||
+        error.message?.includes('validation_failed') ||
+        error.message?.includes('Unsupported provider')
+      ) {
+        setErrorMessage(
+          'O login com Google ainda não está ativado no painel do Supabase. Por favor, use o campo de E-mail abaixo (link de acesso) que já funciona imediatamente!'
+        );
+      } else {
+        setErrorMessage(error.message || 'Erro ao conectar com Google.');
+      }
     }
   };
 
