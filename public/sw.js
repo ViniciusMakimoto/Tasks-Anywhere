@@ -1,16 +1,22 @@
 // Service Worker para TasksAnywhere (Offline Cache & PWA)
 const CACHE_NAME = 'tasksanywhere-v1';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.svg',
+  './',
+  './index.html',
+  './manifest.json',
+  './favicon.svg',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return Promise.allSettled(
+        STATIC_ASSETS.map((asset) =>
+          cache.add(asset).catch((err) => console.warn(`Cache skip for ${asset}:`, err))
+        )
+      );
     })
   );
   self.skipWaiting();

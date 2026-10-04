@@ -8,7 +8,10 @@ export async function registerServiceWorker(): Promise<boolean> {
   }
 
   try {
-    await navigator.serviceWorker.register('/sw.js');
+    const rawBase = import.meta.env?.BASE_URL || '/';
+    const cleanBase = rawBase === '/' ? '' : rawBase.replace(/\/$/, '');
+    const swPath = `${cleanBase}/sw.js`;
+    await navigator.serviceWorker.register(swPath);
     return true;
   } catch (err) {
     console.error('Falha ao registrar Service Worker PWA:', err);
